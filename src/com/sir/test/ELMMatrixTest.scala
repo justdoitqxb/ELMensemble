@@ -56,7 +56,7 @@ object ELMMatrixTest {
     elmMat6.set(1, 2, 3.0);
     elmMat6.set(3, 1, 4.0);
     //printElement(elmMat6.T * elmMat6)
-    val mat = new ELMMatrix(50, 40).rand()
+    val mat = new ELMMatrix(40, 50).rand()
     printElement(ELMMatrix.pinv(mat, sc) * mat)
     sc.stop()
   }
