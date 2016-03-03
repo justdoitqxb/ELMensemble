@@ -21,7 +21,7 @@ object SVDTest {
     val sc = new SparkContext("local","svdtest")
     val svdMatrix = sc.textFile(dataFile).map(_.split(" "))
     val rowMatrix = new RowMatrix(svdMatrix.map(_.map(_.toDouble)).map(_.toArray).map(line => Vectors.dense(line)))
-    val svd = rowMatrix.computeSVD(5, true, 0)
+    val svd = rowMatrix.computeSVD(3, true, 0)
     svd.s.toArray.foreach(println)
     svd.U.rows.foreach(println)
     svd.V.toArray.foreach(println)

@@ -201,6 +201,11 @@ class ELMMatrix(rowNum: Int, columnNum: Int) extends Serializable{
     }
     newMat
   } 
+  
+  def printElement(){
+    matrix.foreach(row => println(row.mkString(",")))
+    println()
+  }
 }
 
 object ELMMatrix {
@@ -284,28 +289,27 @@ object ELMMatrix {
    */
   
   def pinv(mat: ELMMatrix, sc: SparkContext): ELMMatrix = {
-    require(mat.rows <= mat.columns)
-    def SInvConstruct(V: Array[Double], rows: Int, columns: Int): ELMMatrix = {
-      val SS = new ELMMatrix(rows, columns)
-      for(i <- 0 until java.lang.Math.min(rows, columns)){
+    def SInvConstruct(V: Array[Double], p: Int): ELMMatrix = {
+      val SS = new ELMMatrix(p, p)
+      for(i <- 0 until p){
         SS.set(i, i, 1.0 / V(i))
       }
       SS
     }
-    def UConstruct(U: RowMatrix, rows: Int): ELMMatrix = {
-      val UU = new ELMMatrix(rows, rows)
+    def UConstruct(U: RowMatrix, rows: Int, p: Int): ELMMatrix = {
+      val UU = new ELMMatrix(rows, p)
       var i = 0
       for(row <- U.rows.collect()){
         val rowArr = row.toArray
-        for(j <- 0 until rows){
+        for(j <- 0 until p){
           UU.set(i, j, rowArr.apply(j))
         }
         i += 1
       }
       UU
     }
-    def VConstruct(V: Matrix, columns: Int): ELMMatrix = {
-      val VV = new ELMMatrix(columns, columns)
+    def VConstruct(V: Matrix): ELMMatrix = {
+      val VV = new ELMMatrix(V.numRows, V.numCols)
       for(i <- 0 until V.numRows){
         for(j <- 0 until V.numCols){
           VV.set(i, j, V.apply(i, j))
@@ -313,17 +317,19 @@ object ELMMatrix {
       }
       VV
     }
-    //val pinvMat = new ELMMatrix(mat.columns(), mat.rows())
     val ELMMatrixtoRDD = sc.parallelize(mat.matrix, 1)
     val rowMatrix = new RowMatrix(ELMMatrixtoRDD.map(line => Vectors.dense(line)))
-    val svd: SingularValueDecomposition[RowMatrix, Matrix] = rowMatrix.computeSVD(mat.columns, true, 0)
-//    svd.s.toArray.foreach(println)
-//    svd.U.rows.foreach(println)
-//    println(svd.U.numRows())
-//    println(svd.U.numCols())
-//    println(svd.s.size)
-//    println(svd.V.numRows)
-//    println(svd.V.numCols)
-    VConstruct(svd.V, mat.columns()) * (SInvConstruct(svd.s.toArray, mat.rows(), mat.columns()).T) * (UConstruct(svd.U, mat.rows()).T)
+    val svd: SingularValueDecomposition[RowMatrix, Matrix] = rowMatrix.computeSVD(mat.columns, true)
+//      svd.s.toArray.foreach(println)
+//      svd.U.rows.foreach(println)
+//      svd.V.toArray.foreach(println)
+//      println()
+//      println(svd.U.numRows())
+//      println(svd.U.numCols())
+//      println(svd.s.size)
+//      println(svd.V.numRows)
+//      println(svd.V.numCols)
+    val p = svd.s.size
+    VConstruct(svd.V) * SInvConstruct(svd.s.toArray, p) * (UConstruct(svd.U, mat.rows, p).T)
   }
 }
