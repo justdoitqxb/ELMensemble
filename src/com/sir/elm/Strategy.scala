@@ -1,9 +1,13 @@
-package com.sir.analysis
+package com.sir.elm
 
-import ELMType._
-import KernelType._
-import StrategyType._
-import ActivationFuncType._
+import com.sir.analysis.ELMType
+import com.sir.analysis.KernelType
+import com.sir.analysis.StrategyType
+import com.sir.analysis.ActivationFuncType
+import com.sir.analysis.ELMType._
+import com.sir.analysis.KernelType._
+import com.sir.analysis.StrategyType._
+import com.sir.analysis.ActivationFuncType._
 /** 
  * configuration options for elm & elm ensemble construction 
  * @param elmType  Learning goal.  Supported: 
@@ -25,13 +29,13 @@ trait Strategy{
  * @param activationFunc: The activate function type of the hidden nodes
  * @param numClasses: Number of classes for classification. 
  */
-private[sir] case class ELMStrategy(
+case class ELMStrategy(
     flag: ELMType,
     activationFunc: ActivationFuncType,
     numberofHiddenNode: Int = 100) extends Strategy{
 
   def isClassification: Boolean = { 
-    flag == Classification
+    flag == ELMType.Classification
   } 
 
   /** 
@@ -40,8 +44,8 @@ private[sir] case class ELMStrategy(
    */ 
   override def assertValid(): Unit = { 
     flag match { 
-       case Classification => require(true, "test")
-       case Regression => 
+       case ELMType.Classification => require(true, "test")
+       case ELMType.Regression => 
          require(true, "test")
        case _ => throw new IllegalArgumentException( 
           s"DecisionTree Strategy given invalid flag parameter: $flag." + 
@@ -50,7 +54,7 @@ private[sir] case class ELMStrategy(
   }
 }
 
-private[sir] case class ELMEnsembleStrategy(
+case class ELMEnsembleStrategy(
     flag: ELMType,
     numClasses: Int) extends Strategy{
   /** 
@@ -59,11 +63,11 @@ private[sir] case class ELMEnsembleStrategy(
    */ 
   override def assertValid(): Unit = { 
     flag match { 
-       case Classification => 
+       case ELMType.Classification => 
          require(numClasses >= 2, 
            s"DecisionTree Strategy for Classification must have numClasses >= 2," + 
            s" but numClasses = $numClasses.") 
-       case Regression => 
+       case ELMType.Regression => 
          require(true, 
            s"DecisionTree Strategy given invalid impurity for Regression:." + 
            s"  Valid settings: Variance") 
@@ -74,7 +78,7 @@ private[sir] case class ELMEnsembleStrategy(
     } 
   }
 }
-private[sir] case class A(name: String)
+
 object Strategy { 
   /** 
    * Construct a default set of parameters for [[com.sir.elm.ELM]] or [[com.sir.elmensemble.ELMEnsemble]] according to flag
