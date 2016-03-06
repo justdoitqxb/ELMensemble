@@ -1,4 +1,4 @@
-package com.sir.analysis
+package com.sir.config
 
 object KernelType extends Enumeration{
   type KernelType = Value

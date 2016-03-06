@@ -1,4 +1,4 @@
-package com.sir.analysis
+package com.sir.config
 
 object ELMType extends Enumeration{
   type ELMType = Value

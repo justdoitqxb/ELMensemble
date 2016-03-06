@@ -1,8 +1,10 @@
 package com.sir.elm
 
 import org.apache.spark.rdd.RDD
-import com.sir.analysis.ELMType._
-import com.sir.analysis.ActivationFuncType._
+import com.sir.config.ELMType
+import com.sir.config.ELMType._
+import com.sir.config.ActivationFuncType
+import com.sir.config.ActivationFuncType._
 import com.sir.util.ClassedPoint
 
 /*

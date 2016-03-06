@@ -1,4 +1,4 @@
-package com.sir.analysis
+package com.sir.config
 /*
  * Type of activation function: 
  *    'sigmoid' for Sigmoidal function

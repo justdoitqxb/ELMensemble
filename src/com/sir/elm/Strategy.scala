@@ -1,13 +1,13 @@
 package com.sir.elm
 
-import com.sir.analysis.ELMType
-import com.sir.analysis.KernelType
-import com.sir.analysis.StrategyType
-import com.sir.analysis.ActivationFuncType
-import com.sir.analysis.ELMType._
-import com.sir.analysis.KernelType._
-import com.sir.analysis.StrategyType._
-import com.sir.analysis.ActivationFuncType._
+import com.sir.config.ELMType
+import com.sir.config.KernelType
+import com.sir.config.StrategyType
+import com.sir.config.ActivationFuncType
+import com.sir.config.ELMType._
+import com.sir.config.KernelType._
+import com.sir.config.StrategyType._
+import com.sir.config.ActivationFuncType._
 /** 
  * configuration options for elm & elm ensemble construction 
  * @param elmType  Learning goal.  Supported: 
