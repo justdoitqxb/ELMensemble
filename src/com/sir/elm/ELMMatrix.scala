@@ -249,6 +249,27 @@ object ELMMatrix {
     newMat
   }
   
+   def sin(mat: ELMMatrix): ELMMatrix = {
+    val newMat = new ELMMatrix(mat.rows(), mat.columns())
+    for (i <- 0 until mat.rows()){
+      for (j <- 0 until mat.columns()){
+        newMat.set(i, j, Math.sin(mat.get(i, j)))
+      }
+    }
+    newMat
+  }
+   
+  def hardlim(mat: ELMMatrix): ELMMatrix = {
+    val newMat = new ELMMatrix(mat.rows(), mat.columns())
+    for (i <- 0 until mat.rows()){
+      for (j <- 0 until mat.columns()){
+        val tmp = if(mat.get(i, j) >= 0) 1 else 0
+        newMat.set(i, j, tmp)
+      }
+    }
+    newMat
+  }
+  
   def log(mat: ELMMatrix): ELMMatrix = {
     val newMat = new ELMMatrix(mat.rows(), mat.columns())
     for (i <- 0 until mat.rows()){

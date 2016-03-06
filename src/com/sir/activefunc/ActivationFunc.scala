@@ -12,27 +12,27 @@ trait ActivationFunc{
   def active(mat: ELMMatrix): ELMMatrix
 }
 
-case class SigmoidActivation(flag: ActivationFuncType = Sigmoid) extends ActivationFunc{
+case class SigmoidActivation(flag: ActivationFuncType = ActivationFuncType.Sigmoid) extends ActivationFunc{
   override def active(mat: ELMMatrix): ELMMatrix = {
-    mat + 1.0
+    ELMMatrix.tanh(mat)
   }
 }
 
-case class TanhActivation(flag: ActivationFuncType = Tanh) extends ActivationFunc{
+case class TanhActivation(flag: ActivationFuncType = ActivationFuncType.Tanh) extends ActivationFunc{
   override def active(mat: ELMMatrix): ELMMatrix = {
-    mat
+    ELMMatrix.tanh(mat)
   }
 }
 
-case class SinActivation(flag: ActivationFuncType= Sin) extends ActivationFunc{
+case class SinActivation(flag: ActivationFuncType= ActivationFuncType.Sin) extends ActivationFunc{
   override def active(mat: ELMMatrix): ELMMatrix = {
-    mat
+    ELMMatrix.sin(mat)
   }
 }
 
-case class HardlimActivation(flag: ActivationFuncType = Hardlim) extends ActivationFunc{
+case class HardlimActivation(flag: ActivationFuncType = ActivationFuncType.Hardlim) extends ActivationFunc{
   override def active(mat: ELMMatrix): ELMMatrix = {
-    mat
+    ELMMatrix.hardlim(mat)
   }
 }
 
@@ -44,20 +44,12 @@ object ActivationFunc {
    * 
    * @param flag --  active method that can be used. 
    * @param mat -- [ELMMatrix], the H matrix
-   * @param k -- coefficient used within [PolynomialKernel,SigmoidKernel,WaveletKernel] ; Default value: 1.0D, 
-   * @param degree -- coefficient used within [PolynomialKernel,WaveletKernel]; Default value: 2.0D, 
-   * @param sigma -- coefficient used within [RBFKernel]; Default value: 1.0D,
-   * @param delta -- coefficient used within [SigmoidKernel,WaveletKernel]; Default value:1.0D
    * 
    * @return [ELMMatrix] that presents corresponding active function. 
    */
   def calActiveFunc(
       flag: ActivationFuncType,
-      mat: ELMMatrix,
-      k: Double = 1.0D, 
-      degree: Double = 2.0D, 
-      sigma: Double = 1.0D,
-      delta: Double = 1.0D): ELMMatrix = {
+      mat: ELMMatrix): ELMMatrix = {
     flag match{
       case ActivationFuncType.Sigmoid => SigmoidActivation(flag).active(mat)
       case ActivationFuncType.Tanh => TanhActivation(flag).active(mat)
