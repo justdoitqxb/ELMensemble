@@ -7,14 +7,20 @@ import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import com.sir.util.Predictor
 import com.sir.elm.ELMMatrix
+import com.sir.config.ActivationFuncType
+import com.sir.config.ActivationFuncType._
 
 class ELMModel(
+    val elmType: ELMType,
     val WAug: ELMMatrix,
-    val bete: Vector,
-    val activationFunc: String,
-    val elmType:ELMType)extends Serializable with Predictor{
+    val bete: Array[Double],
+    val activationFunc: ActivationFuncType,
+    val tainingAccuracy: Double)extends Serializable with Predictor{
   
-  override def predict(features: Array[Double]): Option[Double] = None
+  override def predict(features: Array[Double]): Double = {
+    val fAug = features :+ 1.0
+    1.0
+  }
   /** 
    * Print a summary of the model. 
    */ 
@@ -30,7 +36,7 @@ class ELMModel(
    * @param features array representing a single data point 
    * @return Double prediction from the trained model 
    */ 
-  def predict(features: Vector): Double = { 
+  override def predict(features: Vector): Double = { 
     1.0D
   }
   /** 
@@ -48,7 +54,7 @@ class ELMModel(
    * @param path  Path specifying the directory in which to save this model. 
    *              If the directory already exists, this method throws an exception. 
    */ 
-  override def save(sc: SparkContext, path: String): Unit = { 
+  def save(sc: SparkContext, path: String): Unit = { 
     
   }
 }

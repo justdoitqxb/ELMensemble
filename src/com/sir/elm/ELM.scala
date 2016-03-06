@@ -3,7 +3,8 @@ package com.sir.elm
 import org.apache.spark.rdd.RDD
 import com.sir.util.ClassedPoint
 import com.sir.util.TimeTracker
-import com.sir.analysis.Strategy
+import com.sir.model.ELMModel
+
 /**
  * Generic Predictor provides predict.
  * Created by Qin on 2015. 12. 15..
@@ -18,9 +19,10 @@ class ELM(val strategy: Strategy){
   def run(input: RDD[ClassedPoint]): ELMModel = { 
     val timer = new TimeTracker() 
     timer.start("total") 
-
+    val elmMeta = ELMMeta.buildMeta(input, strategy)
     timer.stop("total") 
-    new ELMModel() 
+    val beta = Array(1.0)
+    new ELMModel(elmMeta.flag, elmMeta.WAug, beta, elmMeta.activationFunc, 1.0) 
   } 
 }
 
