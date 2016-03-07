@@ -31,8 +31,9 @@ trait Strategy{
  */
 case class ELMStrategy(
     flag: ELMType,
-    activationFunc: ActivationFuncType,
-    numberofHiddenNode: Int = 100) extends Strategy{
+    numberofHiddenNode: Int,
+    numClasses: Int,
+    activationFunc: ActivationFuncType) extends Strategy{
 
   def isClassification: Boolean = { 
     flag == ELMType.Classification
@@ -85,19 +86,25 @@ object Strategy {
    * @param flag  "ELM" or "ELMEnsemble"
    * @param elmType  "Classification" or "Regression" 
    */ 
-  def defaultELMStrategy(flag: StrategyType, elmType: ELMType, activationFunc: ActivationFuncType): Strategy = flag match { 
+  def defaultELMStrategy(flag: StrategyType): Strategy = flag match { 
     case StrategyType.ELM => 
-      ELMStrategy(elmType, activationFunc) 
+      ELMStrategy(ELMType.Classification, 100, 2, ActivationFuncType.Sigmoid) 
     case StrategyType.ELMEnsemble => 
-      ELMEnsembleStrategy(flag = elmType, numClasses = 0) 
+      ELMEnsembleStrategy(ELMType.Classification, 2) 
   } 
   
   /** 
    * Construct a set of parameters for [[com.sir.elm.ELM]] or [[com.sir.elmensemble.ELMEnsemble]] according to flag
 	 */  
-  def generateStrategy(flag: StrategyType, elmType: ELMType, activationFunc: ActivationFuncType): Strategy = {
-    defaultELMStrategy(flag, elmType, activationFunc)
+  def generateStrategy(
+      flag: StrategyType, 
+      elmType: ELMType, 
+      activationFunc: ActivationFuncType, 
+      numberofHiddenNode: Int,
+      numClasses: Int): Strategy = flag match{
+    case StrategyType.ELM => 
+      ELMStrategy(elmType, numberofHiddenNode, numClasses, activationFunc) 
+    case StrategyType.ELMEnsemble => 
+      ELMEnsembleStrategy(elmType, 2) 
   }
-  
-
 } 

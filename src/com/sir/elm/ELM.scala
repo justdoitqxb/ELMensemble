@@ -4,12 +4,15 @@ import org.apache.spark.rdd.RDD
 import com.sir.util.ClassedPoint
 import com.sir.util.TimeTracker
 import com.sir.model.ELMModel
+import com.sir.config.ELMType
+import com.sir.config.ELMType._
+import org.apache.spark.SparkContext
 
 /**
  * Generic Predictor provides predict.
  * Created by Qin on 2015. 12. 15..
  */
-class ELM(val strategy: Strategy){
+class ELM(val strategy: Strategy, sc: SparkContext){
   /** 
    * Method to train a ELM over an RDD 
    * 
@@ -20,10 +23,35 @@ class ELM(val strategy: Strategy){
     val timer = new TimeTracker() 
     timer.start("total") 
     val elmMeta = ELMMeta.buildMeta(input, strategy)
+    val beta = calBeta(input, elmMeta)
     timer.stop("total") 
-    val beta = Array(1.0)
     new ELMModel(elmMeta.flag, elmMeta.WAug, beta, elmMeta.activationFunc, 1.0) 
   } 
+  
+  private def calBeta(input: RDD[ClassedPoint], elmMeta: ELMMeta): ELMMatrix = elmMeta.flag match{
+      case ELMType.Classification => 
+        val (features, target) = reBuildData(input, elmMeta)
+        val H = features * elmMeta.WAug
+        val pinvH = ELMMatrix.pinv(H, sc)
+        pinvH * target
+      case ELMType.Regression => throw new IllegalArgumentException(s"Not support for regression now")
+  }
+
+  private def reBuildData(input: RDD[ClassedPoint], elmMeta: ELMMeta): (ELMMatrix, ELMMatrix) = {
+    val features = new ELMMatrix(elmMeta.numExamples, elmMeta.numFeatures + 1)
+    val target = new ELMMatrix(elmMeta.numExamples, elmMeta.numClasses)
+    val tmp = input.collect()
+    for(i <- 0 until elmMeta.numExamples){
+      val example = tmp.apply(i)
+      for(j <- 0 until elmMeta.numFeatures){
+        features.set(i, j, example.features.apply(j))
+        target.set(i, example.label.toInt, 1.0)
+      }
+      features.set(i, elmMeta.numFeatures, 1.0)
+    }   
+    (features, target)
+  }
+    
 }
 
 object ELM extends Serializable {
@@ -39,13 +67,13 @@ object ELM extends Serializable {
   */
   def trainClassifier(
     trainSet: RDD[ClassedPoint],
-    strategy: Strategy): ELMModel = {
-      new ELM(strategy).run(trainSet)
+    strategy: Strategy, sc: SparkContext): ELMModel = {
+      new ELM(strategy, sc).run(trainSet)
   }
   
-  def trainRegressor(
-    trainSet: RDD[ClassedPoint],
-    strategy: Strategy): ELMModel = {
-      new ELM(strategy).run(trainSet)
-  }
+//  def trainRegressor(
+//    trainSet: RDD[ClassedPoint],
+//    strategy: Strategy): ELMModel = {
+//      new ELM(strategy).run(trainSet)
+//  }
 }

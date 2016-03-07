@@ -13,7 +13,7 @@ import com.sir.config.ActivationFuncType._
 class ELMModel(
     val elmType: ELMType,
     val WAug: ELMMatrix,
-    val bete: Array[Double],
+    val bete: ELMMatrix,
     val activationFunc: ActivationFuncType,
     val tainingAccuracy: Double)extends Serializable with Predictor{
   
@@ -36,7 +36,7 @@ class ELMModel(
    * @param features array representing a single data point 
    * @return Double prediction from the trained model 
    */ 
-  override def predict(features: Vector): Double = { 
+  def predict(features: Vector): Double = { 
     1.0D
   }
   /** 
@@ -44,7 +44,7 @@ class ELMModel(
    * 
    * @param features RDD representing data points to be predicted 
    * @return RDD of predictions for each of the given data points 
-  */  
+   */  
   def predict(features: RDD[Vector]): RDD[Double] = { 
     features.map(x => predict(x)) 
   } 

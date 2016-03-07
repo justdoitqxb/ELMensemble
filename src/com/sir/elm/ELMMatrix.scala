@@ -72,7 +72,7 @@ class ELMMatrix(rowNum: Int, columnNum: Int) extends Serializable{
     val rand = new Random(42)
     for (i <- 0 until rowNum) {
       for (j <- 0 until columnNum) {
-        matrix(i)(j) = rand.nextDouble
+        matrix(i)(j) = (rand.nextDouble * 2.0) - 1.0
       }
     }
     this
