@@ -7,6 +7,7 @@ import com.sir.model.ELMModel
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import org.apache.spark.SparkContext
+import com.sir.activefunc.ActivationFunc
 
 /**
  * Generic Predictor provides predict.
@@ -31,8 +32,8 @@ class ELM(val strategy: Strategy, sc: SparkContext){
   private def calBeta(input: RDD[ClassedPoint], elmMeta: ELMMeta): ELMMatrix = elmMeta.flag match{
       case ELMType.Classification => 
         val (features, target) = reBuildData(input, elmMeta)
-        val H = features * elmMeta.WAug
-        val pinvH = ELMMatrix.pinv(H, sc)
+        val HActive = ActivationFunc.calActiveFunc(elmMeta.activationFunc, features * elmMeta.WAug)
+        val pinvH = ELMMatrix.pinv(HActive, sc)
         pinvH * target
       case ELMType.Regression => throw new IllegalArgumentException(s"Not support for regression now")
   }

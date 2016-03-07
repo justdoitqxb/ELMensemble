@@ -149,7 +149,7 @@ class ELMMatrix(rowNum: Int, columnNum: Int) extends Serializable{
     require(scalar != 0)
     this * (1 / scalar)
   }
-
+  
   def *(mat: ELMMatrix): ELMMatrix = {
     require(columns() == mat.rows())
     var product = new ELMMatrix(rows(), mat.columns())
@@ -209,6 +209,20 @@ class ELMMatrix(rowNum: Int, columnNum: Int) extends Serializable{
 }
 
 object ELMMatrix {
+  def converttoELMMatrix(arr: Array[Double], RorC: Boolean = true): ELMMatrix = RorC match{
+    case true => 
+      val newMat = new ELMMatrix(arr.length, 1)
+      for(i <- 0 until arr.length){
+        newMat.set(i, 0, arr.apply(i))
+      }
+      newMat
+    case false =>
+      val newMat = new ELMMatrix(1, arr.length)
+      for(i <- 0 until arr.length){
+        newMat.set(0, i, arr.apply(i))
+      }
+      newMat
+  }
   def power(mat: ELMMatrix, degree: Double): ELMMatrix = {
     val newMat = new ELMMatrix(mat.rows(), mat.columns())
     for (i <- 0 until mat.rows()){

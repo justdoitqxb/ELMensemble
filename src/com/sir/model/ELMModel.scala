@@ -1,26 +1,45 @@
 package com.sir.model
 
-import org.apache.spark.SparkContext 
-import org.apache.spark.rdd.RDD 
-import org.apache.spark.mllib.linalg.Vector 
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
+import org.apache.spark.mllib.linalg.Vector
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import com.sir.util.Predictor
 import com.sir.elm.ELMMatrix
 import com.sir.config.ActivationFuncType
 import com.sir.config.ActivationFuncType._
+import com.sir.util.ClassedPoint
+import com.sir.activefunc.ActivationFunc
 
 class ELMModel(
     val elmType: ELMType,
     val WAug: ELMMatrix,
-    val bete: ELMMatrix,
+    val beta: ELMMatrix,
     val activationFunc: ActivationFuncType,
     val tainingAccuracy: Double)extends Serializable with Predictor{
   
   override def predict(features: Array[Double]): Double = {
     val fAug = features :+ 1.0
-    1.0
+    val newFeatures = ELMMatrix.converttoELMMatrix(fAug)
+    val HActive = ActivationFunc.calActiveFunc(activationFunc, newFeatures * WAug)
+    val output = (HActive * beta).applyRow(0)
+    maxPosition(output)
   }
+  
+  private def maxPosition(arr: Array[Double]): Double = {
+    require(arr.length > 0)
+    var maxValue = arr.apply(0)
+    var maxPosition = 0
+    for(i <- 1 until arr.length){
+      if(arr.apply(i) > maxValue){
+        maxValue = arr.apply(i)
+        maxPosition = i
+      }
+    }
+    maxPosition.toDouble
+  }
+  
   /** 
    * Print a summary of the model. 
    */ 
@@ -30,23 +49,15 @@ class ELMModel(
     case _ => throw new IllegalArgumentException(s"ELMModel given unknown algo parameter: $elmType.") 
   } 
 
-  /** 
-   * Predict values for a single data point using the model trained. 
-   * 
-   * @param features array representing a single data point 
-   * @return Double prediction from the trained model 
-   */ 
-  def predict(features: Vector): Double = { 
-    1.0D
-  }
+
   /** 
    * Predict values for the given data set using the model trained. 
    * 
    * @param features RDD representing data points to be predicted 
    * @return RDD of predictions for each of the given data points 
    */  
-  def predict(features: RDD[Vector]): RDD[Double] = { 
-    features.map(x => predict(x)) 
+  def predict(features: RDD[Array[Double]]): RDD[ClassedPoint] = { 
+    features.map(x => ClassedPoint(predict(x), x)) 
   } 
   
   /** 
