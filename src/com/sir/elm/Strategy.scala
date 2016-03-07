@@ -11,12 +11,11 @@ import com.sir.config.ActivationFuncType._
 /** 
  * configuration options for elm & elm ensemble construction 
  * @param elmType  Learning goal.  Supported: 
- *              [[com.sir.analysis.ELMType.Classification]], 
- *              [[com.sir.analysis.ELMType.Regression]] 
+ *              [[com.sir.config.ELMType.Classification]], 
+ *              [[com.sir.config.ELMType.Regression]] 
  * @param numClasses Number of classes for classification. Default value is 2 (binary classification). 
  * @param subsamplingRate Fraction of the training data used for learning elm model. 
  */ 
-
 trait Strategy{
   def assertValid: Unit
 }
@@ -55,9 +54,92 @@ case class ELMStrategy(
   }
 }
 
+case class KernelELMStrategy(
+    flag: ELMType,
+    numClasses: Int,
+    regularizationCoefficient: Double,
+    kernelType: KernelType) extends Strategy{
+  /** 
+   * Check validity of parameters. 
+   * Throws exception if invalid. 
+   */ 
+  override def assertValid(): Unit = { 
+    flag match { 
+       case ELMType.Classification => 
+         require(numClasses >= 2, 
+           s"DecisionTree Strategy for Classification must have numClasses >= 2," + 
+           s" but numClasses = $numClasses.") 
+       case ELMType.Regression => 
+         require(true, 
+           s"DecisionTree Strategy given invalid impurity for Regression:." + 
+           s"  Valid settings: Variance") 
+       case _ => 
+         throw new IllegalArgumentException( 
+          s"DecisionTree Strategy given invalid flag parameter: $flag." + 
+          s"  Valid settings are: Classification, Regression.") 
+    } 
+  }
+}
+
 case class ELMEnsembleStrategy(
     flag: ELMType,
-    numClasses: Int) extends Strategy{
+    numClasses: Int,
+    RegularizationCoefficient: Double,
+    kernelType: KernelType) extends Strategy{
+  /** 
+   * Check validity of parameters. 
+   * Throws exception if invalid. 
+   */ 
+  override def assertValid(): Unit = { 
+    flag match { 
+       case ELMType.Classification => 
+         require(numClasses >= 2, 
+           s"DecisionTree Strategy for Classification must have numClasses >= 2," + 
+           s" but numClasses = $numClasses.") 
+       case ELMType.Regression => 
+         require(true, 
+           s"DecisionTree Strategy given invalid impurity for Regression:." + 
+           s"  Valid settings: Variance") 
+       case _ => 
+         throw new IllegalArgumentException( 
+          s"DecisionTree Strategy given invalid flag parameter: $flag." + 
+          s"  Valid settings are: Classification, Regression.") 
+    } 
+  }
+}
+
+case class KernelELMEnsembleStrategy(
+    flag: ELMType,
+    numClasses: Int,
+    RegularizationCoefficient: Double,
+    kernelType: KernelType) extends Strategy{
+  /** 
+   * Check validity of parameters. 
+   * Throws exception if invalid. 
+   */ 
+  override def assertValid(): Unit = { 
+    flag match { 
+       case ELMType.Classification => 
+         require(numClasses >= 2, 
+           s"DecisionTree Strategy for Classification must have numClasses >= 2," + 
+           s" but numClasses = $numClasses.") 
+       case ELMType.Regression => 
+         require(true, 
+           s"DecisionTree Strategy given invalid impurity for Regression:." + 
+           s"  Valid settings: Variance") 
+       case _ => 
+         throw new IllegalArgumentException( 
+          s"DecisionTree Strategy given invalid flag parameter: $flag." + 
+          s"  Valid settings are: Classification, Regression.") 
+    } 
+  }
+}
+
+case class MixEnsembleStrategy(
+    flag: ELMType,
+    numClasses: Int,
+    RegularizationCoefficient: Double,
+    kernelType: KernelType) extends Strategy{
   /** 
    * Check validity of parameters. 
    * Throws exception if invalid. 
@@ -86,11 +168,17 @@ object Strategy {
    * @param flag  "ELM" or "ELMEnsemble"
    * @param elmType  "Classification" or "Regression" 
    */ 
-  def defaultELMStrategy(flag: StrategyType): Strategy = flag match { 
+  def defaultStrategy(flag: StrategyType): Strategy = flag match {
     case StrategyType.ELM => 
       ELMStrategy(ELMType.Classification, 100, 2, ActivationFuncType.Sigmoid) 
     case StrategyType.ELMEnsemble => 
-      ELMEnsembleStrategy(ELMType.Classification, 2) 
+      ELMEnsembleStrategy(ELMType.Classification, 2, (2^5).toDouble, KernelType.Linear) 
+    case StrategyType.KernelELM =>
+      KernelELMStrategy(ELMType.Classification, 2, (2^5).toDouble, KernelType.Linear)
+    case StrategyType.KernelELMEnsemble =>
+      KernelELMStrategy(ELMType.Classification, 2, (2^5).toDouble, KernelType.Linear)
+    case StrategyType.MixEnsemble =>
+      MixEnsembleStrategy(ELMType.Classification, 2, (2^5).toDouble, KernelType.Linear)
   } 
   
   /** 
@@ -104,7 +192,13 @@ object Strategy {
       numClasses: Int): Strategy = flag match{
     case StrategyType.ELM => 
       ELMStrategy(elmType, numberofHiddenNode, numClasses, activationFunc) 
+    case StrategyType.KernelELM => 
+      KernelELMStrategy(ELMType.Classification, 2, 2^5, KernelType.Linear)
     case StrategyType.ELMEnsemble => 
-      ELMEnsembleStrategy(elmType, 2) 
+      ELMEnsembleStrategy(ELMType.Classification, 2, 2^5, KernelType.Linear)
+    case StrategyType.KernelELMEnsemble => 
+      KernelELMEnsembleStrategy(ELMType.Classification, 2, 2^5, KernelType.Linear)
+    case StrategyType.MixEnsemble => 
+      MixEnsembleStrategy(ELMType.Classification, 2, 2^5, KernelType.Linear)
   }
 } 

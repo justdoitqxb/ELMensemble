@@ -3,60 +3,59 @@ package com.sir.elm
 import org.apache.spark.rdd.RDD
 import com.sir.util.ClassedPoint
 import com.sir.util.TimeTracker
-import com.sir.model.ELMModel
+import com.sir.model.KernelELMModel
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import org.apache.spark.SparkContext
 import com.sir.activefunc.ActivationFunc
+import com.sir.kernel.Kernel
 
 /**
  * Generic Predictor provides predict.
- * Created by Qin on 2015. 12. 15..
+ * Created by Qin on 2016. 3. 7..
  */
-class ELM(val strategy: Strategy, sc: SparkContext){
+class KernelELM(val strategy: Strategy, sc: SparkContext){
   /** 
    * Method to train a ELM over an RDD 
    * 
    * @param input Training data: RDD of [ClassedPoint]. 
    * @return ELMModel that can be used for prediction. 
    */ 
-  def run(input: RDD[ClassedPoint]): ELMModel = { 
+  def run(input: RDD[ClassedPoint]): KernelELMModel = { 
     strategy.assertValid
     val timer = new TimeTracker() 
     timer.start("total") 
-    val elmMeta = ELMMeta.buildMeta(input, strategy)
-    val beta = calBeta(input, elmMeta)
+    val kernelELMMeta = KernelELMMeta.buildKernelMeta(input, strategy)
+    val (features, target) = reBuildData(input, kernelELMMeta)
+    val beta = calBeta(features, target, kernelELMMeta)
     timer.stop("total") 
-    new ELMModel(elmMeta.flag, elmMeta.WAug, beta, elmMeta.activationFunc, 1.0) //???Generate training accuracy
+    new KernelELMModel(kernelELMMeta.flag, features, kernelELMMeta.kernelType, beta, 1.0)  //???
   } 
   
-  private def calBeta(input: RDD[ClassedPoint], elmMeta: ELMMeta): ELMMatrix = elmMeta.flag match{
-      case ELMType.Classification => 
-        val (features, target) = reBuildData(input, elmMeta)
-        val HActive = ActivationFunc.calActiveFunc(elmMeta.activationFunc, features * elmMeta.WAug)
-        val pinvH = ELMMatrix.pinv(HActive, sc)
-        pinvH * target
+  private def calBeta(features: ELMMatrix, target: ELMMatrix, kernelELMMeta: KernelELMMeta): ELMMatrix = kernelELMMeta.flag match{
+      case ELMType.Classification =>         
+        val kernelMat = Kernel.calKernel(kernelELMMeta.kernelType, features, features)
+        val pinvKernelMat = ELMMatrix.pinv(kernelMat, sc)
+        pinvKernelMat * target
       case ELMType.Regression => throw new IllegalArgumentException(s"Not support for regression now")
   }
 
-  private def reBuildData(input: RDD[ClassedPoint], elmMeta: ELMMeta): (ELMMatrix, ELMMatrix) = {
-    val features = new ELMMatrix(elmMeta.numExamples, elmMeta.numFeatures + 1)
-    val target = new ELMMatrix(elmMeta.numExamples, elmMeta.numClasses)
+  private def reBuildData(input: RDD[ClassedPoint], kernelELMMeta: KernelELMMeta): (ELMMatrix, ELMMatrix) = {
+    val features = new ELMMatrix(kernelELMMeta.numExamples, kernelELMMeta.numFeatures)
+    val target = new ELMMatrix(kernelELMMeta.numExamples, kernelELMMeta.numClasses)
     val tmp = input.collect()
-    for(i <- 0 until elmMeta.numExamples){
+    for(i <- 0 until kernelELMMeta.numExamples){
       val example = tmp.apply(i)
-      for(j <- 0 until elmMeta.numFeatures){
+      for(j <- 0 until kernelELMMeta.numFeatures){
         features.set(i, j, example.features.apply(j))
         target.set(i, example.label.toInt, 1.0)
       }
-      features.set(i, elmMeta.numFeatures, 1.0)
     }   
     (features, target)
-  }
-    
+  }   
 }
 
-object ELM extends Serializable {
+object KernelELM extends Serializable {
     /**
   * Method to train a ELM model for binary or multiclass classification.
   *
@@ -69,8 +68,8 @@ object ELM extends Serializable {
   */
   def trainClassifier(
     trainSet: RDD[ClassedPoint],
-    strategy: Strategy, sc: SparkContext): ELMModel = {
-      new ELM(strategy, sc).run(trainSet)
+    strategy: Strategy, sc: SparkContext): KernelELMModel = {
+      new KernelELM(strategy, sc).run(trainSet)
   }
   
 //  def trainRegressor(
