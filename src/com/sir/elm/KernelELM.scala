@@ -35,7 +35,8 @@ class KernelELM(val strategy: Strategy, sc: SparkContext){
   private def calBeta(features: ELMMatrix, target: ELMMatrix, kernelELMMeta: KernelELMMeta): ELMMatrix = kernelELMMeta.flag match{
       case ELMType.Classification =>         
         val kernelMat = Kernel.calKernel(kernelELMMeta.kernelType, features, features)
-        val pinvKernelMat = ELMMatrix.pinv(kernelMat, sc)
+        val regularization = new SparserELMMatrix(kernelELMMeta.numExamples, kernelELMMeta.numExamples).speye / kernelELMMeta.regularizationCoefficient
+        val pinvKernelMat = ELMMatrix.pinv(kernelMat + regularization , sc)
         pinvKernelMat * target
       case ELMType.Regression => throw new IllegalArgumentException(s"Not support for regression now")
   }

@@ -126,6 +126,14 @@ class ELMMatrix(rowNum: Int, columnNum: Int) extends Serializable{
     }
     newMat
   }
+  
+  def +(sparserMat: SparserELMMatrix): ELMMatrix = {
+    require(rows() == sparserMat.rows() && columns() == sparserMat.columns())
+    for (element <- sparserMat.elements){
+        matrix(element._1._1)(element._1._2) = matrix(element._1._1)(element._1._2) + element._2
+    }
+    this
+  }
 
   def -(scalar: Double): ELMMatrix = {
     this + (-1.0 * scalar)
