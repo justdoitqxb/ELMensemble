@@ -1,5 +1,7 @@
 package com.sir.util
 
+import org.apache.spark.rdd.RDD
+
 /**
  * Generic Predictor provides predict.
  *
@@ -7,4 +9,5 @@ package com.sir.util
  */
 trait Predictor {
   def predict(features: Array[Double]): Double
+  def predict(features: RDD[Array[Double]]): RDD[ClassedPoint]
 }

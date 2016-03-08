@@ -56,7 +56,7 @@ class ELMModel(
    * @param features RDD representing data points to be predicted 
    * @return RDD of predictions for each of the given data points 
    */  
-  def predict(features: RDD[Array[Double]]): RDD[ClassedPoint] = { 
+  override def predict(features: RDD[Array[Double]]): RDD[ClassedPoint] = { 
     features.map(x => ClassedPoint(predict(x), x)) 
   } 
   

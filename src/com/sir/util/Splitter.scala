@@ -1,10 +1,10 @@
 package com.sir.util
 
 import org.apache.spark.SparkContext._
+import org.apache.spark.rdd.RDD
 import scala.util.Random
-import com.sir.util.ClassedPoint
 
-object Splitter  {
+object Splitter {
 
   /*
    * select m features in [0,M). M--total feature number
@@ -52,22 +52,31 @@ object Splitter  {
   }
   
   /*
-   * bootstrap sampling and select m features
+   * bootstrap sampling -- with repeat
    */
-  def baggingAndSelectFeatures(dataSet: Array[ClassedPoint], m: Int, featureIndice: Array[Int]): Array[ClassedPoint] = {
-
-    val len = dataSet.length
-    val result = for (i <- 0 until len) yield {
-      val point = dataSet(Random.nextInt(len))
-      var selectedFeatures = Array.fill(m)(0.0)
-      for (j <- 0 until m) {
-        selectedFeatures(j) = point.features(featureIndice(j))
-      }
-      ClassedPoint(point.label, selectedFeatures)
-    }
-    result.toArray
+  def bootstrapSampling(dataSet: RDD[ClassedPoint], numSamples: Int): RDD[ClassedPoint] = {
+    val fraction = numSamples.toDouble / dataSet.count().toDouble
+    dataSet.sample(true, fraction)
   }
   
+  /*
+   * Sub sampling -- without repeat
+   */
+  def subSampling(dataSet: RDD[ClassedPoint], numSamples: Int): RDD[ClassedPoint] = {
+    val all = dataSet.count()
+    val fraction = if(all > numSamples.toInt) numSamples.toDouble / dataSet.count().toDouble else 1.0
+    dataSet.sample(true, fraction)
+  }
+  
+  def selectSubFeatures(dataSet: RDD[ClassedPoint], featureIndice: Array[Int]): RDD[ClassedPoint] = {
+    val m = featureIndice.length
+    dataSet.map { x => 
+      var selectedFeatures = Array.fill(m)(0.0)
+      for (j <- 0 until m) {
+        selectedFeatures(j) = x.features(featureIndice(j))
+      }
+      ClassedPoint(x.label, selectedFeatures) }
+  }
   /*
  	* calculate the entropy gain ratio of a numerical attribute 
   */
