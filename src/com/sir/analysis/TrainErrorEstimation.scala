@@ -13,13 +13,13 @@ object TrainErrorEstimation {
     val failCount = labelAndPreds.filter( x =>x._1 != x._2.label).count()
 
     val normalCount = totalCount - failCount
-    val good = labelAndPreds.filter(r => r._1 == r._2).count()
+    val good = labelAndPreds.filter(r => r._1 == r._2.label).count()
 
     println("Total Count = " + totalCount)
     println("Fail to predict = " + failCount)
     println("Error rate = " + (1.0 - (good.toDouble / normalCount)))
 
-    val predxy = (x:Int, y:Int) => labelAndPreds.filter(v => v._1 == x && v._2 == y).count()
+    val predxy = (x:Int, y:Int) => labelAndPreds.filter(v => v._1 == x && v._2.label.toInt == y).count()
     println("Label 0, Pred 0 : " + predxy(0, 0))
     println("Label 0, Pred 1 : " + predxy(0, 1))
     println("Label 1, Pred 0 : " + predxy(1, 0))

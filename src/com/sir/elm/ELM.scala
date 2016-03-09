@@ -6,11 +6,10 @@ import com.sir.util.TimeTracker
 import com.sir.model.ELMModel
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
-import org.apache.spark.SparkContext
-import com.sir.activefunc.ActivationFunc
 import com.sir.config.ELMMeta
 import com.sir.config.Strategy
-
+import org.apache.spark.SparkContext
+import com.sir.activefunc.ActivationFunc
 /**
  * Generic Predictor provides predict.
  * Created by Qin on 2015. 12. 15..

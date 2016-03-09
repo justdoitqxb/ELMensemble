@@ -5,6 +5,7 @@ import org.apache.spark.SparkContext
 import com.sir.util.ClassedPoint
 import com.sir.util.TimeTracker
 import com.sir.util.Predictor
+import com.sir.util.Splitter
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import com.sir.config.ClassifierType
@@ -22,10 +23,10 @@ import com.sir.elm.KernelELM
 class ELMEnsemble (
     val strategy: Strategy, 
     val numFlocks: Int,
+    val numSamplesPerNode: Int,
     val sc: SparkContext){
   /** 
    * Method to train a ELM over an RDD 
-   * 
    * @param input Training data: RDD of [ClassedPoint]. 
    * @return ELMModel that can be used for prediction. 
    */ 
@@ -38,14 +39,15 @@ class ELMEnsemble (
     new ELMEnsembleModel(ELMType.Classification, flocks)
   } 
   
-  private def build(trainSet: RDD[ClassedPoint]): Predictor = {
+  private def build(input: RDD[ClassedPoint]): Predictor = {
     val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy)
+    val numSamples = java.lang.Math.min(numSamplesPerNode, 20000)
+    val trainSet = Splitter.bootstrapSampling(input, numSamples)
     classifierType match {
       case ClassifierType.ELM => ELM.trainClassifier(trainSet, childStrategy, sc)
       case ClassifierType.KernelELM => KernelELM.trainClassifier(trainSet, childStrategy, sc)
       case _ => throw new IllegalArgumentException(s"given unsupported parameter")
     }
-    null
   }
 }
 
@@ -63,8 +65,9 @@ object ELMEnsemble extends {
   def trainClassifier(
     trainSet: RDD[ClassedPoint],
     numFlocks: Int,
+    numSamplesPerNode: Int,
     strategy: Strategy, sc: SparkContext): ELMEnsembleModel = {
-      new ELMEnsemble(strategy, numFlocks, sc).run(trainSet)
+      new ELMEnsemble(strategy, numFlocks, numSamplesPerNode, sc).run(trainSet)
   }
   
 //  def trainRegressor(
