@@ -3,6 +3,8 @@ package com.sir.config
 import org.apache.spark.rdd.RDD
 import com.sir.util.ClassedPoint
 import com.sir.elm.ELMMatrix
+import ELMType._
+import ActivationFuncType._
 
 /*
  * Initial the parameter used in the model training

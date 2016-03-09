@@ -2,7 +2,8 @@ package com.sir.config
 
 import org.apache.spark.rdd.RDD
 import com.sir.util.ClassedPoint
-
+import ELMType._
+import KernelType._
 
 /*
  * Initial the parameter used in the model training

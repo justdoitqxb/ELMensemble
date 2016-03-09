@@ -12,7 +12,7 @@ import com.sir.config.CombinationType._
 
 class ELMEnsembleModel(
     val elmType: ELMType,
-    val flocks: List[Predictor])extends Serializable with Predictor{
+    val flocks: Array[Predictor])extends Serializable with Predictor{
   
   override def predict(features: Array[Double]): Double = {
     1.0

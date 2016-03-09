@@ -1,6 +1,11 @@
 package com.sir.config
 
 import scala.util.Random
+import ELMType._
+import KernelType._
+import StrategyType._
+import ClassifierType._
+import ActivationFuncType._
 /** 
  * configuration options for elm & elm ensemble construction 
  * @param elmType  Learning goal.  Supported: 
@@ -145,7 +150,7 @@ object Strategy {
       throw new IllegalArgumentException(s"given unsupported parameter")
   }
   
-  def generateChildStrategy(strategy: Strategy): Strategy = strategy match{
+  def generateChildStrategy(strategy: Strategy): (ClassifierType, Strategy) = strategy match{
     case ELMEnsembleStrategy(classifierType, elmType, numELM, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType) =>
       val newClassifierType = if(classifierType == ClassifierType.Mix){
         Random.nextInt(2) match{
@@ -156,9 +161,15 @@ object Strategy {
         classifierType
       }
       newClassifierType match{
-        case ClassifierType.ELM => ELMStrategy(elmType , numberofHiddenNode, numClasses, activationFunc)
-        case ClassifierType.KernelELM =>KernelELMStrategy(ELMType.Classification, numClasses, regularizationCoefficient, kernelType)
+        case ClassifierType.ELM => (newClassifierType, ELMStrategy(elmType , numberofHiddenNode, numClasses, activationFunc))
+        case ClassifierType.KernelELM =>(newClassifierType, KernelELMStrategy(ELMType.Classification, numClasses, regularizationCoefficient, kernelType))
       }
     case _ => throw new IllegalArgumentException(s"given unsupported parameter")
   }
+  
+  private def getClassifierType(strategy: Strategy): ClassifierType = strategy match {
+    case ELMEnsembleStrategy(classifierType, elmType, numELM, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType) =>
+      classifierType
+    case _ => throw new IllegalArgumentException(s"given unsupported parameter")
+   }
 } 

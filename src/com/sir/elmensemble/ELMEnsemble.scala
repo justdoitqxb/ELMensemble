@@ -4,16 +4,25 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
 import com.sir.util.ClassedPoint
 import com.sir.util.TimeTracker
+import com.sir.util.Predictor
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
+import com.sir.config.ClassifierType
+import com.sir.config.ClassifierType._
 import com.sir.activefunc.ActivationFunc
 import com.sir.config.Strategy
+import com.sir.model.ELMEnsembleModel
+import com.sir.elm.ELM
+import com.sir.elm.KernelELM
 
 /**
  * Generic Predictor provides predict.
  * Created by Qin on 2015. 12. 15..
  */
-class ELMEnsemble (val strategy: Strategy, sc: SparkContext){
+class ELMEnsemble (
+    val strategy: Strategy, 
+    val numFlocks: Int,
+    val sc: SparkContext){
   /** 
    * Method to train a ELM over an RDD 
    * 
@@ -24,13 +33,19 @@ class ELMEnsemble (val strategy: Strategy, sc: SparkContext){
     strategy.assertValid
     val timer = new TimeTracker() 
     timer.start("total") 
-    flocks = Seq.fill(20)(build(input))
-    new ELMEnsembleModel(ELMType.Classification, flocks)
+    val flocks: Array[Predictor] = Array.fill[Predictor](numFlocks)(build(input))
     timer.stop("total") 
+    new ELMEnsembleModel(ELMType.Classification, flocks)
   } 
   
-  private def build(dataSet: RDD[ClassedPoint]): Predictor = {
-
+  private def build(trainSet: RDD[ClassedPoint]): Predictor = {
+    val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy)
+    classifierType match {
+      case ClassifierType.ELM => ELM.trainClassifier(trainSet, childStrategy, sc)
+      case ClassifierType.KernelELM => KernelELM.trainClassifier(trainSet, childStrategy, sc)
+      case _ => throw new IllegalArgumentException(s"given unsupported parameter")
+    }
+    null
   }
 }
 
@@ -47,8 +62,9 @@ object ELMEnsemble extends {
   */
   def trainClassifier(
     trainSet: RDD[ClassedPoint],
+    numFlocks: Int,
     strategy: Strategy, sc: SparkContext): ELMEnsembleModel = {
-      new ELMEnsemble(strategy, sc).run(trainSet)
+      new ELMEnsemble(strategy, numFlocks, sc).run(trainSet)
   }
   
 //  def trainRegressor(
