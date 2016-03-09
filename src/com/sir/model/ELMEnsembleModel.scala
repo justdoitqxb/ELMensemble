@@ -1,6 +1,8 @@
 package com.sir.model
 
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+import scala.collection.mutable.Map
 import com.sir.util.Predictor
 import com.sir.util.ClassedPoint
 import com.sir.config.ELMType
@@ -16,6 +18,12 @@ class ELMEnsembleModel(
     1.0
   }
   
+  /** 
+   * Predict values for the given data set. 
+   * 
+   * @param features RDD representing data points to be predicted 
+   * @return RDD[Double] where each entry contains the corresponding prediction 
+   */
   override def predict(features: RDD[Array[Double]]): RDD[ClassedPoint] = { 
     features.map(x => ClassedPoint(predict(x), x)) 
   }
@@ -25,19 +33,22 @@ class ELMEnsembleModel(
    * @param features array representing a single data point 
    * @return predicted category from the trained model 
    */ 
-  private def predictBySumming(features: Vector): Double = { 
-    val treePredictions = flocks.map(_.predict(features)) 
-    blas.ddot(numTrees, treePredictions, 1, treeWeights, 1) 
+  private def predictBySumming(features: Array[Double]): Double = { 
+    require(flocks.length > 0)
+    val predictions = flocks.map(_.predict(features)) 
+    predictions.sum / predictions.length
+    1.0
   } 
  
   /** 
    * Classifies a single data point based on (weighted) majority votes. 
    */ 
   private def predictByVoting(features: Array[Double]): Double = { 
-    val votes = mutable.Map.empty[Int, Double] 
-    flocks.view.zip(treeWeights).foreach { case (tree, weight) => 
-      val prediction = tree.predict(features).toInt 
-      votes(prediction) = votes.getOrElse(prediction, 0.0) + weight 
+    val votes = Map.empty[Double, Int] 
+    flocks.foreach { 
+      case pridictor => 
+        val prediction = pridictor.predict(features) 
+        votes(prediction) = votes.getOrElse(prediction, 0) + 1
     } 
     votes.maxBy(_._2)._1 
   } 
@@ -53,35 +64,15 @@ class ELMEnsembleModel(
       case (Regression, Sum) => 
         predictBySumming(features) 
       case (Regression, Average) => 
-        predictBySumming(features) / sumWeights 
-      case (Classification, Sum) => // binary classification 
-        val prediction = predictBySumming(features) 
-        // TODO: predicted labels are +1 or -1 for GBT. Need a better way to store this info. 
-        if (prediction > 0.0) 1.0 else 0.0 
+        predictBySumming(features)
       case (Classification, Vote) => 
         predictByVoting(features) 
       case _ => 
         throw new IllegalArgumentException( 
-         "TreeEnsembleModel given unsupported (algo, combiningStrategy) combination: " + 
+         "ELMEnsembleModel given unsupported (elmType, combinationType) combination: " + 
             s"($elmType, $combinationType).") 
      } 
   } 
-
-  /** 
-   * Predict values for the given data set. 
-   * 
-   * @param features RDD representing data points to be predicted 
-   * @return RDD[Double] where each entry contains the corresponding prediction 
-   */ 
-  def predict(features: RDD[Vector]): RDD[Double] = features.map(x => predict(x)) 
-
-  /** 
-   * Java-friendly version of [[org.apache.spark.mllib.tree.model.TreeEnsembleModel#predict]]. 
-   */ 
-  def predict(features: JavaRDD[Vector]): JavaRDD[java.lang.Double] = { 
-    predict(features.rdd).toJavaRDD().asInstanceOf[JavaRDD[java.lang.Double]] 
-  } 
-
 }
 
 object ELMEnsembleModel { 

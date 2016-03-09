@@ -1,13 +1,8 @@
-package com.sir.elm
+package com.sir.config
 
 import org.apache.spark.rdd.RDD
-import com.sir.config.ELMType
-import com.sir.config.ELMType._
-import com.sir.config.ActivationFuncType
-import com.sir.config.ActivationFuncType._
 import com.sir.util.ClassedPoint
-import com.sir.config.KernelType
-import com.sir.config.KernelType._
+
 
 /*
  * Initial the parameter used in the model training

@@ -9,6 +9,8 @@ import com.sir.config.ELMType._
 import org.apache.spark.SparkContext
 import com.sir.activefunc.ActivationFunc
 import com.sir.kernel.Kernel
+import com.sir.config.KernelELMMeta
+import com.sir.config.Strategy
 
 /**
  * Generic Predictor provides predict.

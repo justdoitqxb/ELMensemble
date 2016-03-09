@@ -65,7 +65,7 @@ object Splitter {
   def subSampling(dataSet: RDD[ClassedPoint], numSamples: Int): RDD[ClassedPoint] = {
     val all = dataSet.count()
     val fraction = if(all > numSamples.toInt) numSamples.toDouble / dataSet.count().toDouble else 1.0
-    dataSet.sample(true, fraction)
+    dataSet.sample(false, fraction)
   }
   
   def selectSubFeatures(dataSet: RDD[ClassedPoint], featureIndice: Array[Int]): RDD[ClassedPoint] = {

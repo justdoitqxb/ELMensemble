@@ -1,35 +1,18 @@
-package com.sir.elm
+package com.sir.config
 
 import org.apache.spark.rdd.RDD
-import com.sir.config.ELMType
-import com.sir.config.ELMType._
-import com.sir.config.ActivationFuncType
-import com.sir.config.ActivationFuncType._
-import com.sir.util.ClassedPoint
-
 /*
  * Initial the parameter used in the model training
  * 
- * @param numFeatures: number of feature 
- * @param numExamples: number of example per elm model used
- * @param numberofHiddenNode: node number of the hidden layer of elm
- * @param WAug: (W:b)
- * @param numClasses -- for classification
- * @param subFeatureSet: feature selected
  */
 
-class ELMMeta(
-  val flag: ELMType,
-  val numFeatures: Int, 
-  val numExamples: Int, 
-  val numberofHiddenNode: Int,
-  val WAug: ELMMatrix,
-  val numClasses: Int,
-  val activationFunc: ActivationFuncType)extends Serializable { 
+class ELMEnsembleMeta(
+  val elmMeta: ELMMeta = null,
+  val kernelELMMeta: KernelELMMeta = null)extends Serializable { 
   //define parameter validation function
 } 
 
-object ELMMeta { 
+object ELMEnsembleMeta { 
   /** 
    * Construct a [ELMMeta] instance for this dataset and parameters.  
    */ 
@@ -44,14 +27,6 @@ object ELMMeta {
     val numExamples = input.count().toInt 
     
     val WAug: ELMMatrix = new ELMMatrix(numberofHiddenNode, numFeatures + 1).rand()
-
-    
-//     val numFeaturesPerModel: Int = _featureSubsetStrategy match { 
-//       case "all" => numFeatures 
-//       case "sqrt" => math.sqrt(numFeatures).ceil.toInt 
-//       case "log2" => math.max(1, (math.log(numFeatures) / math.log(2)).ceil.toInt) 
-//       case "onethird" => (numFeatures / 3.0).ceil.toInt 
-//     } 
      new ELMMeta(flag, numFeatures, numExamples, numberofHiddenNode, WAug, numClasses, activationFunc) 
    }
 } 

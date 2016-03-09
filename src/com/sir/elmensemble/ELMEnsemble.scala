@@ -7,7 +7,7 @@ import com.sir.util.TimeTracker
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import com.sir.activefunc.ActivationFunc
-import com.sir.elm.Strategy
+import com.sir.config.Strategy
 
 /**
  * Generic Predictor provides predict.
@@ -24,12 +24,14 @@ class ELMEnsemble (val strategy: Strategy, sc: SparkContext){
     strategy.assertValid
     val timer = new TimeTracker() 
     timer.start("total") 
-//    val trees = Seq.fill(20)(TreeBuilder.build(data, maxDepth))
-//    RandomForests(trees.toList)
-
-    
+    flocks = Seq.fill(20)(build(input))
+    new ELMEnsembleModel(ELMType.Classification, flocks)
     timer.stop("total") 
   } 
+  
+  private def build(dataSet: RDD[ClassedPoint]): Predictor = {
+
+  }
 }
 
 object ELMEnsemble extends {

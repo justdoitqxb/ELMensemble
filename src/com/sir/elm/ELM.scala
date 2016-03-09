@@ -8,6 +8,8 @@ import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import org.apache.spark.SparkContext
 import com.sir.activefunc.ActivationFunc
+import com.sir.config.ELMMeta
+import com.sir.config.Strategy
 
 /**
  * Generic Predictor provides predict.

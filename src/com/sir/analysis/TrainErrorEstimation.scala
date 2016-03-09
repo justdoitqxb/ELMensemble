@@ -8,25 +8,13 @@ import com.sir.util.Predictor
  * Created by Qin on 2015. 12. 25..
  */
 object TrainErrorEstimation {
-  def estimateError(data: RDD[ClassedPoint], elm: Predictor) {
-    val labelAndPreds = data.map {
-      point =>
-        val prediction: Int = elm.predict(point.features) match {
-          case None => -1
-          case Some(p) =>
-            if (p < 0.5) 0 else 1
-        }
-        (point.label, prediction)
-    }
-
+  def estimateError(labelAndPreds: RDD[(Double, ClassedPoint)]) {
     val totalCount = labelAndPreds.count()
-    val failCount = labelAndPreds.filter(_._2 < 0).count()
+    val failCount = labelAndPreds.filter( x =>x._1 != x._2.label).count()
 
     val normalCount = totalCount - failCount
-
     val good = labelAndPreds.filter(r => r._1 == r._2).count()
 
-    println(elm)
     println("Total Count = " + totalCount)
     println("Fail to predict = " + failCount)
     println("Error rate = " + (1.0 - (good.toDouble / normalCount)))
