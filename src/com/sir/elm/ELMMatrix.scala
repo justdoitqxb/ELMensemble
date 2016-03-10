@@ -219,15 +219,15 @@ class ELMMatrix(rowNum: Int, columnNum: Int) extends Serializable{
 object ELMMatrix {
   def converttoELMMatrix(arr: Array[Double], RorC: Boolean = true): ELMMatrix = RorC match{
     case true => 
-      val newMat = new ELMMatrix(arr.length, 1)
-      for(i <- 0 until arr.length){
-        newMat.set(i, 0, arr.apply(i))
-      }
-      newMat
-    case false =>
       val newMat = new ELMMatrix(1, arr.length)
       for(i <- 0 until arr.length){
         newMat.set(0, i, arr.apply(i))
+      }
+      newMat
+    case false =>
+      val newMat = new ELMMatrix(arr.length, 1)
+      for(i <- 0 until arr.length){
+        newMat.set(i, 0, arr.apply(i))
       }
       newMat
   }

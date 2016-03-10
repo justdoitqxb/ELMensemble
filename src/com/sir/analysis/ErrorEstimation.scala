@@ -9,14 +9,14 @@ import com.sir.util.Predictor
  */
 object ErrorEstimation {
   def estimateError(labelAndPreds: RDD[(Double, ClassedPoint)]) {
-    val totalCount = labelAndPreds.count()
-    val failCount = labelAndPreds.filter( x =>x._1 != x._2.label).count()
-
-    val normalCount = totalCount - failCount
-    val good = labelAndPreds.filter(r => r._1 == r._2.label).count()
-
-    println("Total Count = " + totalCount)
-    println("Fail to predict = " + failCount)
-    println("Error rate = " + (1.0 - (good.toDouble / normalCount)))
+    val total = labelAndPreds.count()
+    val fail = labelAndPreds.filter( x => x._1.toInt != x._2.label.toInt)
+    val good = labelAndPreds.filter(r => r._1.toInt == r._2.label.toInt)
+    labelAndPreds.collect().foreach(println)
+    fail.collect().foreach(println)
+    good.collect().foreach(println)
+//    println("Total Count = " + total + " Good: " + good)
+//    println("Fail to predict = " + fail)
+//    println("Error rate = " + (1.0 - (good.toDouble / total)))
   }
 }

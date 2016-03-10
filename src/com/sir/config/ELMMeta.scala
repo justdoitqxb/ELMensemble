@@ -42,7 +42,7 @@ object ELMMeta {
     } 
     val numExamples = input.count().toInt 
     
-    val WAug: ELMMatrix = new ELMMatrix(numberofHiddenNode, numFeatures + 1).rand()
+    val WAug: ELMMatrix = new ELMMatrix(numFeatures + 1, numberofHiddenNode).rand()
 
     
 //     val numFeaturesPerModel: Int = _featureSubsetStrategy match { 
