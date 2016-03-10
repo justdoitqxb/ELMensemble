@@ -12,10 +12,27 @@ import com.sir.config.CombinationType._
 
 class ELMEnsembleModel(
     val elmType: ELMType,
+    val combinationType: CombinationType,
     val flocks: Array[Predictor])extends Serializable with Predictor{
-  
+  /** 
+   * Predict values for a single data point using the model trained. 
+   * 
+   * @param features array representing a single data point 
+   * @return predicted category from the trained model 
+   */ 
   override def predict(features: Array[Double]): Double = {
-    1.0
+    (elmType, combinationType) match { 
+      case (ELMType.Regression, CombinationType.Sum) => 
+        predictBySumming(features) 
+      case (ELMType.Regression, CombinationType.Average) => 
+        predictBySumming(features)
+      case (ELMType.Classification, CombinationType.Vote) => 
+        predictByVoting(features) 
+      case _ => 
+        throw new IllegalArgumentException( 
+         "ELMEnsembleModel given unsupported (elmType, combinationType) combination: " + 
+            s"($elmType, $combinationType).") 
+     } 
   }
   
   /** 
@@ -37,7 +54,6 @@ class ELMEnsembleModel(
     require(flocks.length > 0)
     val predictions = flocks.map(_.predict(features)) 
     predictions.sum / predictions.length
-    1.0
   } 
  
   /** 
@@ -45,33 +61,11 @@ class ELMEnsembleModel(
    */ 
   private def predictByVoting(features: Array[Double]): Double = { 
     val votes = Map.empty[Double, Int] 
-    flocks.foreach { 
-      case pridictor => 
+    flocks.foreach { pridictor => 
         val prediction = pridictor.predict(features) 
         votes(prediction) = votes.getOrElse(prediction, 0) + 1
     } 
     votes.maxBy(_._2)._1 
-  } 
-
-  /** 
-   * Predict values for a single data point using the model trained. 
-   * 
-   * @param features array representing a single data point 
-   * @return predicted category from the trained model 
-   */ 
-  private def predict(features: Array[Double], combinationType: CombinationType): Double = { 
-   (elmType, combinationType) match { 
-      case (Regression, Sum) => 
-        predictBySumming(features) 
-      case (Regression, Average) => 
-        predictBySumming(features)
-      case (Classification, Vote) => 
-        predictByVoting(features) 
-      case _ => 
-        throw new IllegalArgumentException( 
-         "ELMEnsembleModel given unsupported (elmType, combinationType) combination: " + 
-            s"($elmType, $combinationType).") 
-     } 
   } 
 }
 

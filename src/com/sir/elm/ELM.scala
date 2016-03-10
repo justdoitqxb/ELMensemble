@@ -24,10 +24,11 @@ class ELM(val strategy: Strategy, sc: SparkContext){
   def run(input: RDD[ClassedPoint]): ELMModel = { 
     strategy.assertValid
     val timer = new TimeTracker() 
-    timer.start("total") 
+    timer.start("elm") 
     val elmMeta = ELMMeta.buildMeta(input, strategy)
     val beta = calBeta(input, elmMeta)
-    timer.stop("total") 
+    timer.stop("elm") 
+    println("Training time: " + timer.toString())
     new ELMModel(elmMeta.flag, elmMeta.WAug, beta, elmMeta.activationFunc, 1.0) //???Generate training accuracy
   } 
   

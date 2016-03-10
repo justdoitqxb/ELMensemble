@@ -26,11 +26,12 @@ class KernelELM(val strategy: Strategy, sc: SparkContext){
   def run(input: RDD[ClassedPoint]): KernelELMModel = { 
     strategy.assertValid
     val timer = new TimeTracker() 
-    timer.start("total") 
+    timer.start("kernelelm") 
     val kernelELMMeta = KernelELMMeta.buildKernelMeta(input, strategy)
     val (features, target) = reBuildData(input, kernelELMMeta)
     val beta = calBeta(features, target, kernelELMMeta)
-    timer.stop("total") 
+    timer.stop("kernelelm") 
+    println("Training time: " + timer.toString())
     new KernelELMModel(kernelELMMeta.flag, features, kernelELMMeta.kernelType, beta, 1.0)  //???
   } 
   

@@ -15,6 +15,8 @@ import com.sir.config.Strategy
 import com.sir.model.ELMEnsembleModel
 import com.sir.elm.ELM
 import com.sir.elm.KernelELM
+import com.sir.config.CombinationType
+import com.sir.config.CombinationType._
 
 /**
  * Generic Predictor provides predict.
@@ -36,17 +38,19 @@ class ELMEnsemble (
     timer.start("total") 
     val flocks: Array[Predictor] = Array.fill[Predictor](numFlocks)(build(input))
     timer.stop("total") 
-    new ELMEnsembleModel(ELMType.Classification, flocks)
+    println("Ensemble models training time: " + timer.toString())
+    new ELMEnsembleModel(ELMType.Classification, CombinationType.Vote, flocks) // test ??????
   } 
   
   private def build(input: RDD[ClassedPoint]): Predictor = {
     val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy)
     val numSamples = java.lang.Math.min(numSamplesPerNode, 20000)
     val trainSet = Splitter.bootstrapSampling(input, numSamples)
+    println("Number Examples: " + trainSet.count())
     classifierType match {
       case ClassifierType.ELM => ELM.trainClassifier(trainSet, childStrategy, sc)
       case ClassifierType.KernelELM => KernelELM.trainClassifier(trainSet, childStrategy, sc)
-      case _ => throw new IllegalArgumentException(s"given unsupported parameter")
+      case _ => throw new IllegalArgumentException(s"Given unsupported parameter")
     }
   }
 }
@@ -66,7 +70,8 @@ object ELMEnsemble extends {
     trainSet: RDD[ClassedPoint],
     numFlocks: Int,
     numSamplesPerNode: Int,
-    strategy: Strategy, sc: SparkContext): ELMEnsembleModel = {
+    strategy: Strategy, 
+    sc: SparkContext): ELMEnsembleModel = {
       new ELMEnsemble(strategy, numFlocks, numSamplesPerNode, sc).run(trainSet)
   }
   

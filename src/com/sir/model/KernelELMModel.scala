@@ -25,7 +25,7 @@ class KernelELMModel(
   override def predict(features: Array[Double]): Double = { 
     val newFeatures = ELMMatrix.converttoELMMatrix(features)
     val kernelMat = Kernel.calKernel(kernelType, trainSet, newFeatures)
-    val output = (kernelMat * beta).applyRow(0)
+    val output = (kernelMat.T * beta).applyRow(0)
     maxPosition(output)
   }
   

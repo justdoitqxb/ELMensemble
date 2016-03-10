@@ -1,6 +1,6 @@
 package com.sir.config
 
-import scala.util.Random
+import java.util.Random
 import ELMType._
 import KernelType._
 import StrategyType._
@@ -82,7 +82,6 @@ case class KernelELMStrategy(
 case class ELMEnsembleStrategy(
     classifierType: ClassifierType,
     flag: ELMType,
-    numELM: Int,
     numClasses: Int,    
     numberofHiddenNode: Int = 100,
     activationFunc: ActivationFuncType = ActivationFuncType.Sigmoid,
@@ -122,7 +121,7 @@ object Strategy {
     case StrategyType.KernelELM =>
       KernelELMStrategy(ELMType.Classification, 2, (2^5).toDouble, KernelType.Linear)
     case StrategyType.ELMEnsemble => 
-      ELMEnsembleStrategy(ClassifierType.Mix, ELMType.Classification,3, 2) 
+      ELMEnsembleStrategy(ClassifierType.Mix, ELMType.Classification,2) 
     case _ => 
       throw new IllegalArgumentException(s"given unsupported parameter")
   } 
@@ -134,26 +133,25 @@ object Strategy {
       flag: StrategyType,
       elmType: ELMType,
       numClasses: Int,
-      numELM: Int = 3,
-      classifierType: ClassifierType = ClassifierType.Mix,
+      classifierType: ClassifierType = ClassifierType.KernelELM,
       numberofHiddenNode: Int = 100,
       activationFunc: ActivationFuncType = ActivationFuncType.Sigmoid,
       regularizationCoefficient: Double = (2^5).toDouble,
-      kernelType: KernelType = KernelType.Sigmoid): Strategy = flag match{
+      kernelType: KernelType = KernelType.Linear): Strategy = flag match{
     case StrategyType.ELM => 
       ELMStrategy(elmType, numberofHiddenNode, numClasses, activationFunc) 
     case StrategyType.KernelELM => 
-      KernelELMStrategy(ELMType.Classification, 2, 2^5, KernelType.Linear)
+      KernelELMStrategy(ELMType.Classification, 2, 2^5, kernelType)
     case StrategyType.ELMEnsemble => 
-      ELMEnsembleStrategy(classifierType, elmType, numELM, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType)
+      ELMEnsembleStrategy(classifierType, elmType, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType)
     case _ => 
-      throw new IllegalArgumentException(s"given unsupported parameter")
+      throw new IllegalArgumentException(s"Given unsupported parameter")
   }
   
   def generateChildStrategy(strategy: Strategy): (ClassifierType, Strategy) = strategy match{
-    case ELMEnsembleStrategy(classifierType, elmType, numELM, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType) =>
+    case ELMEnsembleStrategy(classifierType, elmType, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType) =>
       val newClassifierType = if(classifierType == ClassifierType.Mix){
-        Random.nextInt(2) match{
+        new Random().nextInt(2) match{
           case 0 => ClassifierType.ELM
           case 1 => ClassifierType.KernelELM
         }
@@ -168,7 +166,7 @@ object Strategy {
   }
   
   private def getClassifierType(strategy: Strategy): ClassifierType = strategy match {
-    case ELMEnsembleStrategy(classifierType, elmType, numELM, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType) =>
+    case ELMEnsembleStrategy(classifierType, elmType, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType) =>
       classifierType
     case _ => throw new IllegalArgumentException(s"given unsupported parameter")
    }

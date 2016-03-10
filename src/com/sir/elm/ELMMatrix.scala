@@ -144,7 +144,7 @@ class ELMMatrix(rowNum: Int, columnNum: Int) extends Serializable{
   }
 
   def *(scalar: Double): ELMMatrix = {
-    val newMat = new ELMMatrix(columns(), rows())
+    val newMat = new ELMMatrix(rows(), columns())
     for (i <- 0 until rowNum){
       for (j <- 0 until columnNum){
         newMat.matrix(i)(j) = matrix(i)(j) * scalar
