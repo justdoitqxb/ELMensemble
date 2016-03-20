@@ -261,6 +261,16 @@ object ELMMatrix {
     newMat
   }
   
+  def sigmod(mat: ELMMatrix): ELMMatrix = {
+    val newMat = new ELMMatrix(mat.rows(), mat.columns())
+    for (i <- 0 until mat.rows()){
+      for (j <- 0 until mat.columns()){
+        newMat.set(i, j, 1.0 / (1 + (-1.0) * Math.exp(mat.get(i, j))))
+      }
+    }
+    newMat
+  }
+  
   def cos(mat: ELMMatrix): ELMMatrix = {
     val newMat = new ELMMatrix(mat.rows(), mat.columns())
     for (i <- 0 until mat.rows()){
@@ -285,7 +295,7 @@ object ELMMatrix {
     val newMat = new ELMMatrix(mat.rows(), mat.columns())
     for (i <- 0 until mat.rows()){
       for (j <- 0 until mat.columns()){
-        val tmp = if(mat.get(i, j) >= 0) 1 else 0
+        val tmp = if(mat.get(i, j) >= 0) 1.0 else -1.0
         newMat.set(i, j, tmp)
       }
     }

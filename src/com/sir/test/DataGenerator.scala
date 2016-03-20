@@ -17,7 +17,7 @@ object DataGenerator {
       val rand = new Random(66 + index)
       val label = new Random().nextInt(numClasses)
       val features = Array.fill[Double](numFeatures) { 
-        rand.nextGaussian() * 2.0 + labels(label)
+        (rand.nextGaussian() * 2.0 + labels(label)) / 10.0
       } 
       ClassedPoint(label.toDouble, features) 
     } 

@@ -14,6 +14,8 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.linalg.Vectors
+import com.sir.config.ClassifierType
+import com.sir.config.ClassifierType._
 
 object EnsembleTest {
   def main(args: Array[String]): Unit = {
@@ -28,7 +30,7 @@ object EnsembleTest {
     val numSamplesPerNode: Int = 400
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
-    val strategy = Strategy.generateStrategy(flag, elmType, numClasses)
+    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.KernelELM)
     val model = ELMEnsemble.trainClassifier(trainData, numFlocks, numSamplesPerNode, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)

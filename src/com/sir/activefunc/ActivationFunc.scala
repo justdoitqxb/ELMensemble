@@ -14,7 +14,7 @@ trait ActivationFunc{
 
 case class SigmoidActivation(flag: ActivationFuncType = ActivationFuncType.Sigmoid) extends ActivationFunc{
   override def active(mat: ELMMatrix): ELMMatrix = {
-    ELMMatrix.tanh(mat)
+    ELMMatrix.sigmod(mat)
   }
 }
 

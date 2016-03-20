@@ -49,8 +49,8 @@ class ELM(val strategy: Strategy, sc: SparkContext){
       val example = tmp.apply(i)
       for(j <- 0 until elmMeta.numFeatures){
         features.set(i, j, example.features.apply(j))
-        target.set(i, example.label.toInt, 1.0)
       }
+      target.set(i, example.label.toInt, 1.0)
       features.set(i, elmMeta.numFeatures, 1.0)
     }   
     (features, target)

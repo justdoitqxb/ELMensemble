@@ -17,7 +17,7 @@ object ELMTest {
   def main(args: Array[String]): Unit = {
     val sc = new SparkContext("local","ELMTest")
     val numClasses = 2
-    val data = DataGenerator.generate(500, 100, numClasses, sc)
+    val data = DataGenerator.generate(500, 10, numClasses, sc)
     val splits = data.randomSplit(Array(0.8, 0.2))
     val (trainData, testData) = (splits(0), splits(1))
     println(trainData.count())
@@ -31,6 +31,7 @@ object ELMTest {
       (predict, x.label)
     }
     ErrorEstimation.estimateError(labelAndPreds)
+    //labelAndPreds.collect().foreach(println)
     //与随机森林，结果对比
     val categoricalFeaturesInfo = Map[Int, Int]()
     val numTrees = 2 
