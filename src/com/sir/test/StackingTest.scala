@@ -6,7 +6,7 @@ import com.sir.config.StrategyType
 import com.sir.config.StrategyType._
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
-import com.sir.elmensemble.ELMEnsemble
+import com.sir.elmensemble.ELMBagging
 import com.sir.analysis.ErrorEstimation
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
@@ -17,13 +17,13 @@ import org.apache.spark.mllib.linalg.Vectors
 import com.sir.config.ClassifierType
 import com.sir.config.ClassifierType._
 
-object EnsembleTest {
+object StackingTest {
   def main(args: Array[String]): Unit = {
     val sc = new SparkContext("local","ELMTest")
     val numClasses = 2
     val data = DataGenerator.generate(5000, 100, numClasses, sc)
-    val splits = data.randomSplit(Array(0.8, 0.2))
-    val (trainData, testData) = (splits(0), splits(1))
+    val splits = data.randomSplit(Array(0.5, 0.3, 0.2))
+    val (trainData, stackingTraindata, testData) = (splits(0), splits(1), splits(2))
     println(trainData.count())
     println(testData.count())
     val numFlocks: Int  = 10
@@ -31,7 +31,7 @@ object EnsembleTest {
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.KernelELM)
-    val model = ELMEnsemble.trainClassifier(trainData, numFlocks, numSamplesPerNode, strategy, sc)
+    val model = ELMStacking.trainClassifier(trainData, numFlocks, numSamplesPerNode, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)

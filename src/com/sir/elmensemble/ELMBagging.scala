@@ -12,7 +12,7 @@ import com.sir.config.ClassifierType
 import com.sir.config.ClassifierType._
 import com.sir.activefunc.ActivationFunc
 import com.sir.config.Strategy
-import com.sir.model.ELMEnsembleModel
+import com.sir.model.ELMBaggingModel
 import com.sir.elm.ELM
 import com.sir.elm.KernelELM
 import com.sir.config.CombinationType
@@ -22,7 +22,7 @@ import com.sir.config.CombinationType._
  * Generic Predictor provides predict.
  * Created by Qin on 2015. 12. 15..
  */
-class ELMEnsemble (
+class ELMBagging (
     val strategy: Strategy, 
     val numFlocks: Int,
     val numSamplesPerNode: Int,
@@ -32,14 +32,14 @@ class ELMEnsemble (
    * @param input Training data: RDD of [ClassedPoint]. 
    * @return ELMModel that can be used for prediction. 
    */ 
-  def run(input: RDD[ClassedPoint]): ELMEnsembleModel = { 
+  def run(input: RDD[ClassedPoint]): ELMBaggingModel = { 
     strategy.assertValid
     val timer = new TimeTracker() 
     timer.start("total") 
     val flocks: Array[Predictor] = Array.fill[Predictor](numFlocks)(build(input))
     timer.stop("total") 
     println("Ensemble models training time: " + timer.toString())
-    new ELMEnsembleModel(ELMType.Classification, CombinationType.Vote, flocks) // test ??????
+    new ELMBaggingModel(ELMType.Classification, CombinationType.Vote, flocks) // test ??????
   } 
   
   private def build(input: RDD[ClassedPoint]): Predictor = {
@@ -55,7 +55,7 @@ class ELMEnsemble (
   }
 }
 
-object ELMEnsemble extends {
+object ELMBagging {
     /**
   * Method to train model for binary or multiclass classification.
   *
@@ -71,8 +71,8 @@ object ELMEnsemble extends {
     numFlocks: Int,
     numSamplesPerNode: Int,
     strategy: Strategy, 
-    sc: SparkContext): ELMEnsembleModel = {
-      new ELMEnsemble(strategy, numFlocks, numSamplesPerNode, sc).run(trainSet)
+    sc: SparkContext): ELMBaggingModel = {
+      new ELMBagging(strategy, numFlocks, numSamplesPerNode, sc).run(trainSet)
   }
   
 //  def trainRegressor(

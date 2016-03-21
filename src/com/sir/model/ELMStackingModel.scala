@@ -10,7 +10,7 @@ import com.sir.config.ELMType._
 import com.sir.config.CombinationType
 import com.sir.config.CombinationType._
 
-class ELMEnsembleModel(
+class ELMStackingModel(
     val elmType: ELMType,
     val combinationType: CombinationType,
     val flocks: Array[Predictor])extends Serializable with Predictor{
@@ -69,7 +69,7 @@ class ELMEnsembleModel(
   } 
 }
 
-object ELMEnsembleModel { 
+object ELMStackingModel { 
   /** 
    * Model data for model import/export. 
    */ 
