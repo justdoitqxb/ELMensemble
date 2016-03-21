@@ -8,6 +8,10 @@ import com.sir.util.Predictor
  * Created by Qin on 2015. 12. 25..
  */
 object ErrorEstimation {
+  def estimateTrainingACC(labelAndPred: RDD[(Double, Double)]): Double = {
+    labelAndPred.filter(r => r._1 == r._2).count.toDouble / labelAndPred.count()
+  }
+  
   def estimateError(labelAndPreds: RDD[(Double, Double)]): Unit = {
 //    val total = labelAndPreds.count()
 //    val fail = labelAndPreds.filter( x => x._1.toInt != x._2.label.toInt)

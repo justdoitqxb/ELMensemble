@@ -2,6 +2,7 @@ package com.sir.elmensemble
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
+import scala.collection.mutable.ArrayBuffer
 import com.sir.util.ClassedPoint
 import com.sir.util.TimeTracker
 import com.sir.util.Predictor
@@ -12,9 +13,10 @@ import com.sir.config.ClassifierType
 import com.sir.config.ClassifierType._
 import com.sir.activefunc.ActivationFunc
 import com.sir.config.Strategy
-import com.sir.model.ELMBaggingModel
+import com.sir.model.ELMStackingModel
 import com.sir.elm.ELM
 import com.sir.elm.KernelELM
+import com.sir.elm.ELMMatrix
 import com.sir.config.CombinationType
 import com.sir.config.CombinationType._
 
@@ -26,24 +28,27 @@ class ELMStacking (
     val strategy: Strategy, 
     val numFlocks: Int,
     val numSamplesPerNode: Int,
+    val elmPerKelm: Double,
     val sc: SparkContext){
   /** 
    * Method to train a ELM over an RDD 
    * @param input Training data: RDD of [ClassedPoint]. 
    * @return ELMModel that can be used for prediction. 
    */ 
-  def run(input: RDD[ClassedPoint]): ELMBaggingModel = { 
+  def run(input1: RDD[ClassedPoint], input2: RDD[ClassedPoint]): ELMStackingModel = { 
     strategy.assertValid
     val timer = new TimeTracker() 
     timer.start("total") 
-    val flocks: Array[Predictor] = Array.fill[Predictor](numFlocks)(build(input))
+    val flocks: Array[Predictor] = Array.fill[Predictor](numFlocks)(buildBaseClassifier(input1))
+    val filterFlocks = flocks.filter { predictor => predictor.weight > 0.5 }
+    val tier2Weight = calTier2Weight(filterFlocks, input2) 
     timer.stop("total") 
     println("Ensemble models training time: " + timer.toString())
-    new ELMBaggingModel(ELMType.Classification, CombinationType.Vote, flocks) // test ??????
+    new ELMStackingModel(ELMType.Classification, filterFlocks, tier2Weight)
   } 
   
-  private def build(input: RDD[ClassedPoint]): Predictor = {
-    val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy)
+  private def buildBaseClassifier(input: RDD[ClassedPoint]): Predictor = {
+    val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy, elmPerKelm)
     val numSamples = java.lang.Math.min(numSamplesPerNode, 20000)
     val trainSet = Splitter.bootstrapSampling(input, numSamples)
     println("Number Examples: " + trainSet.count())
@@ -52,6 +57,32 @@ class ELMStacking (
       case ClassifierType.KernelELM => KernelELM.trainClassifier(trainSet, childStrategy, sc)
       case _ => throw new IllegalArgumentException(s"Given unsupported parameter")
     }
+  }
+  
+  private def calTier2Weight(flocks: Array[Predictor], input2: RDD[ClassedPoint]): ELMMatrix = {
+    val numSamples = java.lang.Math.min(input2.count().toInt, 100000)
+    val trainSet = if(numSamples == 100000) Splitter.bootstrapSampling(input2, numSamples) else input2
+    val tier2TrainSet = trainSet.map { sample => 
+      val newFeatures = ArrayBuffer[Double]()
+      for(i <- 0 until flocks.length){
+        newFeatures ++= flocks.apply(i).calOutput(sample.features)
+      }
+      ClassedPoint(sample.label, newFeatures.toArray)
+    }
+    val tmp = tier2TrainSet.collect()
+    val numFeatures = tmp.apply(0).features.length
+    val numClasses = numFeatures / flocks.length
+    val features = new ELMMatrix(numSamples, numFeatures)
+    val target = new ELMMatrix(numSamples, numClasses)
+    for(i <- 0 until numSamples){
+      val example = tmp.apply(i)
+      for(j <- 0 until numFeatures){
+        features.set(i, j, example.features.apply(j))
+      }
+      target.set(i, example.label.toInt, 1.0)
+    } 
+    val pinvH = ELMMatrix.pinv(features, sc)
+    pinvH * target
   }
 }
 
@@ -67,12 +98,14 @@ object ELMStacking{
   * @return ELM model that can be used for prediction
   */
   def trainClassifier(
-    trainSet: RDD[ClassedPoint],
+    tier1TrainSet: RDD[ClassedPoint],
+    tier2TrainSet: RDD[ClassedPoint],
     numFlocks: Int,
     numSamplesPerNode: Int,
+    elmPerKelm: Double,
     strategy: Strategy, 
-    sc: SparkContext): ELMBaggingModel = {
-      new ELMStacking(strategy, numFlocks, numSamplesPerNode, sc).run(trainSet)
+    sc: SparkContext): ELMStackingModel = {
+      new ELMStacking(strategy, numFlocks, numSamplesPerNode, elmPerKelm, sc).run(tier1TrainSet, tier2TrainSet)
   }
   
 //  def trainRegressor(

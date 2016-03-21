@@ -32,7 +32,9 @@ class KernelELM(val strategy: Strategy, sc: SparkContext){
     val beta = calBeta(features, target, kernelELMMeta)
     timer.stop("kernelelm") 
     println("Training time: " + timer.toString())
-    new KernelELMModel(kernelELMMeta.flag, features, kernelELMMeta.kernelType, beta, 1.0)  //???
+    val model = new KernelELMModel(kernelELMMeta.flag, features, kernelELMMeta.kernelType, beta)
+    model.SetTainingAccuracy(input)
+    model
   } 
   
   private def calBeta(features: ELMMatrix, target: ELMMatrix, kernelELMMeta: KernelELMMeta): ELMMatrix = kernelELMMeta.flag match{

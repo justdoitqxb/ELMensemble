@@ -19,7 +19,7 @@ class ELMBaggingModel(
    * 
    * @param features array representing a single data point 
    * @return predicted category from the trained model 
-   */ 
+   */
   override def predict(features: Array[Double]): Double = {
     (elmType, combinationType) match { 
       case (ELMType.Regression, CombinationType.Sum) => 
@@ -28,12 +28,16 @@ class ELMBaggingModel(
         predictBySumming(features)
       case (ELMType.Classification, CombinationType.Vote) => 
         predictByVoting(features) 
+      case (ELMType.Classification, CombinationType.WeightVote) =>
+        predictByWeightVoting(features)
       case _ => 
         throw new IllegalArgumentException( 
          "ELMEnsembleModel given unsupported (elmType, combinationType) combination: " + 
             s"($elmType, $combinationType).") 
      } 
   }
+  
+  override def calOutput(features: Array[Double]): Array[Double] = null
   
   /** 
    * Predict values for the given data set. 
@@ -61,9 +65,20 @@ class ELMBaggingModel(
    */ 
   private def predictByVoting(features: Array[Double]): Double = { 
     val votes = Map.empty[Double, Int] 
-    flocks.foreach { pridictor => 
-        val prediction = pridictor.predict(features) 
-        votes(prediction) = votes.getOrElse(prediction, 0) + 1
+    flocks.foreach { predictor => 
+        val prediction = predictor.predict(features) 
+        val validate = if(predictor.weight > 0.5) 1 else 0
+        votes(prediction) = votes.getOrElse(prediction, 0) + validate
+    } 
+    votes.maxBy(_._2)._1 
+  } 
+  
+  private def predictByWeightVoting(features: Array[Double]): Double = { 
+    val votes = Map.empty[Double, Double] 
+    flocks.foreach { predictor => 
+        val prediction = predictor.predict(features) 
+        val validate = if(predictor.weight > 0.5) predictor.weight else 0.0
+        votes(prediction) = votes.getOrElse(prediction, 0.0) + validate
     } 
     votes.maxBy(_._2)._1 
   } 

@@ -11,33 +11,25 @@ import com.sir.config.ActivationFuncType
 import com.sir.config.ActivationFuncType._
 import com.sir.util.ClassedPoint
 import com.sir.activefunc.ActivationFunc
+import com.sir.analysis.ErrorEstimation
+import com.sir.util.KitBox
 
 class ELMModel(
     val elmType: ELMType,
     val WAug: ELMMatrix,
     val beta: ELMMatrix,
-    val activationFunc: ActivationFuncType,
-    val tainingAccuracy: Double)extends Serializable with Predictor{
+    val activationFunc: ActivationFuncType)extends Serializable with Predictor{
   
   override def predict(features: Array[Double]): Double = {
+    val output = calOutput(features);
+    KitBox.maxPosition(output)
+  }
+  
+  override def calOutput(features: Array[Double]): Array[Double] = {
     val fAug = features :+ 1.0
     val newFeatures = ELMMatrix.converttoELMMatrix(fAug)
     val HActive = ActivationFunc.calActiveFunc(activationFunc, newFeatures * WAug)
-    val output = (HActive * beta).applyRow(0)
-    maxPosition(output)
-  }
-  
-  private def maxPosition(arr: Array[Double]): Double = {
-    require(arr.length > 0)
-    var maxValue = arr.apply(0)
-    var maxPosition = 0
-    for(i <- 1 until arr.length){
-      if(arr.apply(i) > maxValue){
-        maxValue = arr.apply(i)
-        maxPosition = i
-      }
-    }
-    maxPosition.toDouble
+    (HActive * beta).applyRow(0)
   }
   
   /** 
@@ -48,8 +40,7 @@ class ELMModel(
     case Regression => s"ELMModel regressor" 
     case _ => throw new IllegalArgumentException(s"ELMModel given unknown algo parameter: $elmType.") 
   } 
-
-
+  
   /** 
    * Predict values for the given data set using the model trained. 
    * 
@@ -59,6 +50,14 @@ class ELMModel(
   override def predict(features: RDD[Array[Double]]): RDD[ClassedPoint] = { 
     features.map(x => ClassedPoint(predict(x), x)) 
   } 
+  
+  def SetTainingAccuracy(trainData: RDD[ClassedPoint]): Unit = {
+    val labelAndPred = trainData.map{x =>
+      val pred = predict(x.features)
+      (pred, x.label)
+    }
+    weight = ErrorEstimation.estimateTrainingACC(labelAndPred)
+  }
   
   /** 
    * @param sc  Spark context used to save model data. 

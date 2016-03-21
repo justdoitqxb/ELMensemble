@@ -8,14 +8,17 @@ import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import com.sir.elmensemble.ELMBagging
 import com.sir.analysis.ErrorEstimation
+import com.sir.config.ClassifierType
+import com.sir.config.ClassifierType._
+import com.sir.config.CombinationType
+import com.sir.config.CombinationType._
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
 import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.linalg.Vectors
-import com.sir.config.ClassifierType
-import com.sir.config.ClassifierType._
+
 
 object BaggingTest {
   def main(args: Array[String]): Unit = {
@@ -31,7 +34,7 @@ object BaggingTest {
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.KernelELM)
-    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, strategy, sc)
+    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.8, CombinationType.Vote, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)

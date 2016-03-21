@@ -26,6 +26,8 @@ class ELMBagging (
     val strategy: Strategy, 
     val numFlocks: Int,
     val numSamplesPerNode: Int,
+    val elmPerKelm: Double,
+    val combinationType: CombinationType,
     val sc: SparkContext){
   /** 
    * Method to train a ELM over an RDD 
@@ -39,11 +41,11 @@ class ELMBagging (
     val flocks: Array[Predictor] = Array.fill[Predictor](numFlocks)(build(input))
     timer.stop("total") 
     println("Ensemble models training time: " + timer.toString())
-    new ELMBaggingModel(ELMType.Classification, CombinationType.Vote, flocks) // test ??????
+    new ELMBaggingModel(ELMType.Classification, combinationType, flocks) // test ??????
   } 
   
   private def build(input: RDD[ClassedPoint]): Predictor = {
-    val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy)
+    val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy, elmPerKelm)
     val numSamples = java.lang.Math.min(numSamplesPerNode, 20000)
     val trainSet = Splitter.bootstrapSampling(input, numSamples)
     println("Number Examples: " + trainSet.count())
@@ -70,9 +72,11 @@ object ELMBagging {
     trainSet: RDD[ClassedPoint],
     numFlocks: Int,
     numSamplesPerNode: Int,
+    elmPerKelm: Double,
+    combinationType: CombinationType,
     strategy: Strategy, 
     sc: SparkContext): ELMBaggingModel = {
-      new ELMBagging(strategy, numFlocks, numSamplesPerNode, sc).run(trainSet)
+      new ELMBagging(strategy, numFlocks, numSamplesPerNode, elmPerKelm, combinationType, sc).run(trainSet)
   }
   
 //  def trainRegressor(

@@ -14,19 +14,23 @@ import com.sir.activefunc.ActivationFunc
 import com.sir.config.KernelType
 import com.sir.config.KernelType._
 import com.sir.kernel.Kernel
+import com.sir.analysis.ErrorEstimation
 
 class KernelELMModel(
     val elmType: ELMType,
     val trainSet: ELMMatrix,
     val kernelType: KernelType,
-    val beta: ELMMatrix,
-    val tainingAccuracy: Double)extends Serializable with Predictor{
+    val beta: ELMMatrix)extends Serializable with Predictor{
   
   override def predict(features: Array[Double]): Double = { 
+    val output = calOutput(features)
+    maxPosition(output)
+  }
+  
+  override def calOutput(features: Array[Double]): Array[Double] = {
     val newFeatures = ELMMatrix.converttoELMMatrix(features)
     val kernelMat = Kernel.calKernel(kernelType, trainSet, newFeatures)
-    val output = (kernelMat.T * beta).applyRow(0)
-    maxPosition(output)
+    (kernelMat.T * beta).applyRow(0)
   }
   
   private def maxPosition(arr: Array[Double]): Double = {
@@ -61,6 +65,15 @@ class KernelELMModel(
   def predict(features: RDD[Array[Double]]): RDD[ClassedPoint] = { 
     features.map(x => ClassedPoint(predict(x), x)) 
   } 
+  
+  def SetTainingAccuracy(trainData: RDD[ClassedPoint]): Unit = {
+    val labelAndPred = trainData.map{x =>
+      val pred = predict(x.features)
+      (pred, x.label)
+    }
+    weight = ErrorEstimation.estimateTrainingACC(labelAndPred)
+  }
+  
   
   /** 
    * @param sc  Spark context used to save model data. 

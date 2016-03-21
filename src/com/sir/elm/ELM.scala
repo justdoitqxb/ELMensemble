@@ -29,7 +29,10 @@ class ELM(val strategy: Strategy, sc: SparkContext){
     val beta = calBeta(input, elmMeta)
     timer.stop("elm") 
     println("Training time: " + timer.toString())
-    new ELMModel(elmMeta.flag, elmMeta.WAug, beta, elmMeta.activationFunc, 1.0) //???Generate training accuracy
+    val model = new ELMModel(elmMeta.flag, elmMeta.WAug, beta, elmMeta.activationFunc) 
+    model.SetTainingAccuracy(input)
+    model
+    //???Generate training accuracy
   } 
   
   private def calBeta(input: RDD[ClassedPoint], elmMeta: ELMMeta): ELMMatrix = elmMeta.flag match{

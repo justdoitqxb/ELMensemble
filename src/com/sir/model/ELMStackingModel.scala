@@ -3,17 +3,20 @@ package com.sir.model
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import scala.collection.mutable.Map
+import scala.collection.mutable.ArrayBuffer
 import com.sir.util.Predictor
 import com.sir.util.ClassedPoint
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
 import com.sir.config.CombinationType
 import com.sir.config.CombinationType._
+import com.sir.elm.ELMMatrix
+import com.sir.util.KitBox
 
 class ELMStackingModel(
     val elmType: ELMType,
-    val combinationType: CombinationType,
-    val flocks: Array[Predictor])extends Serializable with Predictor{
+    val flocks: Array[Predictor],
+    val tier2Weight: ELMMatrix)extends Serializable with Predictor{
   /** 
    * Predict values for a single data point using the model trained. 
    * 
@@ -21,18 +24,24 @@ class ELMStackingModel(
    * @return predicted category from the trained model 
    */ 
   override def predict(features: Array[Double]): Double = {
-    (elmType, combinationType) match { 
-      case (ELMType.Regression, CombinationType.Sum) => 
-        predictBySumming(features) 
-      case (ELMType.Regression, CombinationType.Average) => 
-        predictBySumming(features)
-      case (ELMType.Classification, CombinationType.Vote) => 
-        predictByVoting(features) 
+    elmType match { 
+      case ELMType.Classification => 
+        val output = calOutput(features)
+        KitBox.maxPosition(output)
       case _ => 
         throw new IllegalArgumentException( 
          "ELMEnsembleModel given unsupported (elmType, combinationType) combination: " + 
-            s"($elmType, $combinationType).") 
+            s"($elmType).") 
      } 
+  }
+  
+  override def calOutput(features: Array[Double]): Array[Double] = {
+    val newFeatures = ArrayBuffer[Double]()
+    for(i <- 0 until flocks.length){
+      newFeatures ++= flocks.apply(i).calOutput(features)
+    }
+    val HActive = ELMMatrix.converttoELMMatrix(newFeatures.toArray)
+    (HActive * tier2Weight).applyRow(0)
   }
   
   /** 
@@ -44,29 +53,7 @@ class ELMStackingModel(
   override def predict(features: RDD[Array[Double]]): RDD[ClassedPoint] = { 
     features.map(x => ClassedPoint(predict(x), x)) 
   }
-  /** 
-   * Predicts for a single data point using the weighted sum of ensemble predictions. 
-   * 
-   * @param features array representing a single data point 
-   * @return predicted category from the trained model 
-   */ 
-  private def predictBySumming(features: Array[Double]): Double = { 
-    require(flocks.length > 0)
-    val predictions = flocks.map(_.predict(features)) 
-    predictions.sum / predictions.length
-  } 
- 
-  /** 
-   * Classifies a single data point based on (weighted) majority votes. 
-   */ 
-  private def predictByVoting(features: Array[Double]): Double = { 
-    val votes = Map.empty[Double, Int] 
-    flocks.foreach { pridictor => 
-        val prediction = pridictor.predict(features) 
-        votes(prediction) = votes.getOrElse(prediction, 0) + 1
-    } 
-    votes.maxBy(_._2)._1 
-  } 
+
 }
 
 object ELMStackingModel { 

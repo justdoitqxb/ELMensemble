@@ -6,6 +6,7 @@ import KernelType._
 import StrategyType._
 import ClassifierType._
 import ActivationFuncType._
+
 /** 
  * configuration options for elm & elm ensemble construction 
  * @param elmType  Learning goal.  Supported: 
@@ -148,10 +149,12 @@ object Strategy {
       throw new IllegalArgumentException(s"Given unsupported parameter")
   }
   
-  def generateChildStrategy(strategy: Strategy): (ClassifierType, Strategy) = strategy match{
+  def generateChildStrategy(strategy: Strategy, elmPerKelm: Double): (ClassifierType, Strategy) = strategy match{
     case ELMEnsembleStrategy(classifierType, elmType, numClasses, numberofHiddenNode, activationFunc, regularizationCoefficient, kernelType) =>
+      require(elmPerKelm >= 0 && elmPerKelm <= 1)
       val newClassifierType = if(classifierType == ClassifierType.Mix){
-        new Random().nextInt(2) match{
+        val percentageMatch = if(new Random().nextDouble() < elmPerKelm) 0 else 1
+        percentageMatch match{
           case 0 => ClassifierType.ELM
           case 1 => ClassifierType.KernelELM
         }
