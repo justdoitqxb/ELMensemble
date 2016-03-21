@@ -30,35 +30,36 @@ object StackingTest {
     val numSamplesPerNode: Int = 400
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
-    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.KernelELM)
+    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.Mix)
     val model = ELMStacking.trainClassifier(trainData, stackingTraindata, numFlocks, numSamplesPerNode, 0.8, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)
     }
     ErrorEstimation.estimateError(labelAndPreds)
+    model.flocks.foreach( p => println(p.weight))
     //与随机森林，结果对比
-    val categoricalFeaturesInfo = Map[Int, Int]()
-    val numTrees = 10
-    val featureSubsetStrategy = "auto" 
-    val impurity = "gini"
-    val maxDepth = 10
-    val maxBins = 32
-    val trainingData = trainData.map { x => LabeledPoint(x.label,Vectors.dense(x.features)) }
-    val rfmodel = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
-      numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
-    val testingData = testData.map{ x => LabeledPoint(x.label,Vectors.dense(x.features)) }
-    val lp = testingData.map { point =>
-       val prediction = rfmodel.predict(point.features)
-       (point.label, prediction)
-    }
-    ErrorEstimation.estimateError(lp)
-    labelAndPreds.unpersist()
-    trainData.unpersist()
-    testData.unpersist()
-    trainingData.unpersist()
-    testingData.unpersist()
-    data.unpersist()
+//    val categoricalFeaturesInfo = Map[Int, Int]()
+//    val numTrees = 10
+//    val featureSubsetStrategy = "auto" 
+//    val impurity = "gini"
+//    val maxDepth = 10
+//    val maxBins = 32
+//    val trainingData = trainData.map { x => LabeledPoint(x.label,Vectors.dense(x.features)) }
+//    val rfmodel = RandomForest.trainClassifier(trainingData, numClasses, categoricalFeaturesInfo,
+//      numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
+//    val testingData = testData.map{ x => LabeledPoint(x.label,Vectors.dense(x.features)) }
+//    val lp = testingData.map { point =>
+//       val prediction = rfmodel.predict(point.features)
+//       (point.label, prediction)
+//    }
+//    ErrorEstimation.estimateError(lp)
+//    labelAndPreds.unpersist()
+//    trainData.unpersist()
+//    testData.unpersist()
+//    trainingData.unpersist()
+//    testingData.unpersist()
+//    data.unpersist()
     sc.stop() 
   }
 }
