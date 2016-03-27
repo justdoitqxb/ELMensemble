@@ -171,9 +171,9 @@ class ELMMatrix(rowNum: Int, columnNum: Int) extends Serializable{
   
   def **(mat: ELMMatrix): ELMMatrix = {
     require(rows() == mat.rows() && columns() == mat.columns())
-    val newMat = new ELMMatrix(columns(), rows())
-    for (i <- 0 until rows()) yield {
-      for (j <- 0 until columns()) yield {
+    val newMat = new ELMMatrix(rows(), columns())
+    for (i <- 0 until rows()){
+      for (j <- 0 until columns()){
         newMat.matrix(i)(j) = matrix(i)(j) * mat.get(i,j)
       }
     }
@@ -323,7 +323,7 @@ object ELMMatrix {
         newMat.set(0, i, mat.applyColumn(i).reduce(_+_))
       }
     }else{
-      for(i <- 0 until mat.columns()){
+      for(i <- 0 until mat.rows()){
         newMat.set(i, 0, mat.applyRow(i).reduce(_+_))
       }
     }

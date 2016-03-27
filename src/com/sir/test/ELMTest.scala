@@ -5,6 +5,8 @@ import com.sir.config.Strategy
 import com.sir.config.StrategyType
 import com.sir.config.ELMType
 import com.sir.elm.ELM
+import com.sir.config.ActivationFuncType
+import com.sir.config.ActivationFuncType._
 import com.sir.analysis.ErrorEstimation
 import org.apache.spark.mllib.tree.RandomForest
 import org.apache.spark.mllib.tree.model.RandomForestModel
@@ -24,7 +26,8 @@ object ELMTest {
     println(testData.count())
     val flag  = StrategyType.ELM
     val elmType = ELMType.Classification
-    val strategy = Strategy.generateStrategy(flag, elmType, numClasses)
+    val actFunc = ActivationFuncType.fromString("sin")
+    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, activationFunc = actFunc)
     val elmModel = ELM.trainClassifier(trainData, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = elmModel.predict(x.features)

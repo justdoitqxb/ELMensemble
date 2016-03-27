@@ -36,7 +36,7 @@ case class RBFKernel(flag: KernelType = KernelType.RBF, sigma: Double = 2.0D) ex
     val onesMatrix = new ELMMatrix(1, matrix_x.rows()).ones
     val xxh1 = ELMMatrix.sum(ELMMatrix.power(matrix_x, 2), 2) * onesSample
     val xxh2 = ELMMatrix.sum(ELMMatrix.power(sample_x, 2), 2) * onesMatrix
-    val omega = xxh1 + (xxh2.T) - ((matrix_x * sample_x.T) * 2.0)
+    val omega = xxh1 + (xxh2.T) - (matrix_x * (sample_x.T) * 2.0)
     ELMMatrix.exp(omega / (-2.0 * sigma * sigma))
   }
 }
@@ -47,9 +47,11 @@ case class WaveletKernel(flag: KernelType = KernelType.Wavelet, k: Double = 1.0D
     val onesMatrix = new ELMMatrix(1, matrix_x.rows()).ones
     val xxh1 = ELMMatrix.sum(ELMMatrix.power(matrix_x, 2), 2) * onesSample
     val xxh2 = ELMMatrix.sum(ELMMatrix.power(sample_x, 2), 2) * onesMatrix
-    val omega = (xxh2.T) + xxh1 - ((matrix_x * sample_x.T) * 2.0)
-    val omega1 = xxh1 - (xxh2.T)
-    ELMMatrix.cos(omega1 / degree * k) * ELMMatrix.exp(omega / (-2.0 * sigma * sigma))
+    val xxh11 = ELMMatrix.sum(matrix_x, 2) * onesSample
+    val xxh22 = ELMMatrix.sum(sample_x, 2) * onesMatrix
+    val omega = (xxh2.T) + xxh1 - (matrix_x * (sample_x.T) * 2.0)
+    val omega1 = xxh11 - (xxh22.T)
+    ELMMatrix.cos(omega1 / degree * k) ** ELMMatrix.exp(omega / (-2.0 * sigma * sigma))
   }
 }
 

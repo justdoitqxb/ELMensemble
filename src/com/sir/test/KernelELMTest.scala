@@ -14,6 +14,8 @@ import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.linalg.Vectors
+import com.sir.config.KernelType
+import com.sir.config.KernelType._
 
 object KernelELMTest {
   def main(args: Array[String]): Unit = {
@@ -26,14 +28,15 @@ object KernelELMTest {
     println(testData.count())
     val flag  = StrategyType.KernelELM
     val elmType = ELMType.Classification
-    val strategy = Strategy.generateStrategy(flag, elmType, numClasses)
+    val kt = KernelType.fromString("wavelet")
+    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, kernelType = kt)
     val model = KernelELM.trainClassifier(trainData, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)
     }
     ErrorEstimation.estimateError(labelAndPreds)
-    //与随机森林，结果对比
+    // 与随机森林，结果对比
     val categoricalFeaturesInfo = Map[Int, Int]()
     val numTrees = 10
     val featureSubsetStrategy = "auto" 
