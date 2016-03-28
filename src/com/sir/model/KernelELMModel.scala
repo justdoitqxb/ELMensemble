@@ -20,7 +20,7 @@ class KernelELMModel(
     val elmType: ELMType,
     val trainSet: ELMMatrix,
     val kernelType: KernelType,
-    val beta: ELMMatrix)extends Serializable with Predictor{
+    val alpha: ELMMatrix)extends Serializable with Predictor{
   
   override def predict(features: Array[Double]): Double = { 
     val output = calOutput(features)
@@ -30,7 +30,7 @@ class KernelELMModel(
   override def calOutput(features: Array[Double]): Array[Double] = {
     val newFeatures = ELMMatrix.converttoELMMatrix(features)
     val kernelMat = Kernel.calKernel(kernelType, trainSet, newFeatures)
-    (kernelMat.T * beta).applyRow(0)
+    (kernelMat.T * alpha).applyRow(0)
   }
   
   private def maxPosition(arr: Array[Double]): Double = {

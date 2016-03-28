@@ -29,15 +29,15 @@ class KernelELM(val strategy: Strategy, sc: SparkContext){
     timer.start("kernelelm") 
     val kernelELMMeta = KernelELMMeta.buildKernelMeta(input, strategy)
     val (features, target) = reBuildData(input, kernelELMMeta)
-    val beta = calBeta(features, target, kernelELMMeta)
+    val alpha = calAlpha(features, target, kernelELMMeta)
     timer.stop("kernelelm") 
     println("Training time: " + timer.toString())
-    val model = new KernelELMModel(kernelELMMeta.flag, features, kernelELMMeta.kernelType, beta)
+    val model = new KernelELMModel(kernelELMMeta.flag, features, kernelELMMeta.kernelType, alpha)
     model.SetTainingAccuracy(input)
     model
   } 
   
-  private def calBeta(features: ELMMatrix, target: ELMMatrix, kernelELMMeta: KernelELMMeta): ELMMatrix = kernelELMMeta.flag match{
+  private def calAlpha(features: ELMMatrix, target: ELMMatrix, kernelELMMeta: KernelELMMeta): ELMMatrix = kernelELMMeta.flag match{
       case ELMType.Classification =>         
         val kernelMat = Kernel.calKernel(kernelELMMeta.kernelType, features, features)
         val regularization = new SparserELMMatrix(kernelELMMeta.numExamples, kernelELMMeta.numExamples).speye / kernelELMMeta.regularizationCoefficient
