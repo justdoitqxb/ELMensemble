@@ -1,6 +1,7 @@
 package com.sir.analysis
 
 import org.apache.spark.SparkContext
+import org.apache.spark.SparkConf
 import com.sir.config.Strategy
 import com.sir.config.StrategyType
 import com.sir.config.StrategyType._
@@ -21,10 +22,10 @@ import org.apache.spark.mllib.linalg.Vectors
 
 object AFAlertTest {
   def main(args: Array[String]): Unit = {
-    val sc = new SparkContext("Master", "AF_Alert")
-    val trainingData = sc.textFile("hdfs://Master:9000/af/training70/")
+    val sc = new SparkContext(new SparkConf().setAppName("AFAlert"))
+    val trainingData = sc.textFile("hdfs://172.17.0.2:9000/af/training70/")
     val training = trainingData.map{ x => ClassedPoint.parse(x, true)}
-    val validataionData = sc.textFile("hdfs://Master:9000/af/validation70/")
+    val validataionData = sc.textFile("hdfs://172.17.0.2:9000/af/validation70/")
     val validation = validataionData.map { ClassedPoint.parse }
          
     val splits = validation.randomSplit(Array(0.8, 0.2))

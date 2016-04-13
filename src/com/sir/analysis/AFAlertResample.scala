@@ -1,5 +1,6 @@
 package com.sir.analysis
 
+import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.SparkContext
 import com.sir.config.Strategy
@@ -26,10 +27,10 @@ object AFAlertResample {
       println("Usage: [training file] [validation file] [number flocks] [num examples per flock] [classifier type] [0+, !0-] [percentage]") 
       System.exit(1) 
     } 
-    val sc = new SparkContext("Master", "AF_Alert")
-    val trainingData = sc.textFile("hdfs://Master:9000" + args(0))
+    val sc = new SparkContext(new SparkConf().setAppName("AFAlertResample"))
+    val trainingData = sc.textFile("hdfs://172.17.0.2:9000" + args(0))
     val training = trainingData.map{ x => ClassedPoint.parse(x, true)}
-    val validataionData = sc.textFile("hdfs://Master:9000" + args(1))
+    val validataionData = sc.textFile("hdfs://172.17.0.2:9000" + args(1))
     val validation = validataionData.map { ClassedPoint.parse }
          
     val splits = validation.randomSplit(Array(0.8, 0.2))

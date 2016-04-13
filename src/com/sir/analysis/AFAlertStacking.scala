@@ -1,5 +1,6 @@
 package com.sir.analysis
 
+import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import com.sir.config.Strategy
 import com.sir.config.StrategyType
@@ -21,10 +22,14 @@ import org.apache.spark.mllib.linalg.Vectors
 
 object AFAlertStacking {
   def main(args: Array[String]): Unit = {
-    val sc = new SparkContext("Master", "AF_Alert")
-    val trainingData = sc.textFile("hdfs://Master:9000" + args(0))
+    if (args.length < 5) { 
+      println("Usage: [training file] [validation file] [number flocks] [num examples per flock] [classifier type]") 
+      System.exit(1) 
+    } 
+    val sc = new SparkContext(new SparkConf().setAppName("AFAlertStacking"))
+    val trainingData = sc.textFile("hdfs://172.17.0.2:9000" + args(0))
     val training = trainingData.map{ x => ClassedPoint.parse(x, true)}
-    val validataionData = sc.textFile("hdfs://Master:9000" + args(1))
+    val validataionData = sc.textFile("hdfs://172.17.0.2:9000" + args(1))
     val validation = validataionData.map { ClassedPoint.parse }
          
     val splits = validation.randomSplit(Array(0.8, 0.2))
