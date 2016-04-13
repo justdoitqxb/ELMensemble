@@ -37,5 +37,11 @@ object ClassedPoint {
      val features = parts.tail.map(parseDouble)
      ClassedPoint(label, features) 
    } 
- } 
+  } 
+  def parse(s: String, flag: Boolean = true): ClassedPoint = { 
+    val parts = s.split(",")
+    val label = parseDouble(parts.head) - 1.0
+    val features = parts.tail.map(parseDouble)
+    ClassedPoint(label, features) 
+  } 
 } 

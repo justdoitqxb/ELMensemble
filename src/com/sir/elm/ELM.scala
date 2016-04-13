@@ -57,8 +57,7 @@ class ELM(val strategy: Strategy, sc: SparkContext){
       features.set(i, elmMeta.numFeatures, 1.0)
     }   
     (features, target)
-  }
-    
+  }   
 }
 
 object ELM extends Serializable {
