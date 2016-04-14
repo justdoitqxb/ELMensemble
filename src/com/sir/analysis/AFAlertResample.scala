@@ -14,12 +14,12 @@ import com.sir.config.ClassifierType._
 import com.sir.config.CombinationType
 import com.sir.config.CombinationType._
 import com.sir.util.ClassedPoint
-import org.apache.spark.mllib.tree.RandomForest
-import org.apache.spark.mllib.tree.model.RandomForestModel
-import org.apache.spark.mllib.util.MLUtils
-import org.apache.spark.mllib.regression.LabeledPoint
-import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.mllib.linalg.Vectors
+//import org.apache.spark.mllib.tree.RandomForest
+//import org.apache.spark.mllib.tree.model.RandomForestModel
+//import org.apache.spark.mllib.util.MLUtils
+//import org.apache.spark.mllib.regression.LabeledPoint
+//import org.apache.spark.mllib.linalg.Vector
+//import org.apache.spark.mllib.linalg.Vectors
 
 object AFAlertResample {
   def main(args: Array[String]): Unit = {
@@ -63,22 +63,22 @@ object AFAlertResample {
       (predict, x.label)
     }
 
-    //与随机森林，结果对比
-    val categoricalFeaturesInfo = Map[Int, Int]()
-    val numTrees = args(2).toInt
-    val featureSubsetStrategy = "auto" 
-    val impurity = "gini"
-    val maxDepth = 10
-    val maxBins = 32
-    val RFTrainData = trainData.map { x => LabeledPoint(x.label,Vectors.dense(x.features)) }
-    val rfmodel = RandomForest.trainClassifier(RFTrainData, numClasses, categoricalFeaturesInfo,
-      numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
-    val testingData = testData.map{ x => LabeledPoint(x.label,Vectors.dense(x.features)) }
-    val lp = testingData.map { point =>
-       val prediction = rfmodel.predict(point.features)
-       (point.label, prediction)
-    }
-    ErrorEstimation.estimateError(lp)
+//    //与随机森林，结果对比
+//    val categoricalFeaturesInfo = Map[Int, Int]()
+//    val numTrees = args(2).toInt
+//    val featureSubsetStrategy = "auto" 
+//    val impurity = "gini"
+//    val maxDepth = 10
+//    val maxBins = 32
+//    val RFTrainData = trainData.map { x => LabeledPoint(x.label,Vectors.dense(x.features)) }
+//    val rfmodel = RandomForest.trainClassifier(RFTrainData, numClasses, categoricalFeaturesInfo,
+//      numTrees, featureSubsetStrategy, impurity, maxDepth, maxBins)
+//    val testingData = testData.map{ x => LabeledPoint(x.label,Vectors.dense(x.features)) }
+//    val lp = testingData.map { point =>
+//       val prediction = rfmodel.predict(point.features)
+//       (point.label, prediction)
+//    }
+//    ErrorEstimation.estimateError(lp)
     ErrorEstimation.estimateError(labelAndPreds)
     sc.stop() 
   }
