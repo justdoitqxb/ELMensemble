@@ -22,7 +22,7 @@ import org.apache.spark.mllib.linalg.Vectors
 
 object AFAlertTest {
   def main(args: Array[String]): Unit = {
-    val sc = new SparkContext(new SparkConf().setAppName("AFAlert"))
+    val sc = new SparkContext(new SparkConf().setAppName("AFAlert").setMaster("spark://172.17.0.2:7077"))
     val trainingData = sc.textFile("hdfs://172.17.0.2:9000/af/training70/")
     val training = trainingData.map{ x => ClassedPoint.parse(x, true)}
     val validataionData = sc.textFile("hdfs://172.17.0.2:9000/af/validation70/")
