@@ -33,12 +33,12 @@ object AFAlertTest {
     val (trainDataPart, testData) = (splits(0), splits(1))
     val trainData = training ++ trainDataPart
     val numClasses = 2
-    val numFlocks: Int = 300
-    val numSamplesPerNode: Int = 5000
+    val numFlocks: Int = 30
+    val numSamplesPerNode: Int = 1000
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
-    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.Mix)
-    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.6, CombinationType.WeightVote, strategy, sc)
+    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.ELM)
+    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.8, CombinationType.WeightVote, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)
@@ -47,7 +47,7 @@ object AFAlertTest {
 
     //与随机森林，结果对比
     val categoricalFeaturesInfo = Map[Int, Int]()
-    val numTrees = 300
+    val numTrees = 30
     val featureSubsetStrategy = "auto" 
     val impurity = "gini"
     val maxDepth = 10

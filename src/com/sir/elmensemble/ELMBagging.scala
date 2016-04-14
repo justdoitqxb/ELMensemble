@@ -46,7 +46,7 @@ class ELMBagging (
   
   private def build(input: RDD[ClassedPoint]): Predictor = {
     val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy, elmPerKelm)
-    val numSamples = java.lang.Math.min(numSamplesPerNode, 20000)
+    val numSamples = java.lang.Math.min(numSamplesPerNode, 10000)
     val trainSet = Splitter.bootstrapSampling(input, numSamples)
     println("Number Examples: " + trainSet.count())
     classifierType match {

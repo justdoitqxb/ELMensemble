@@ -27,7 +27,8 @@ object AFAlertResample {
       println("Usage: [training file] [validation file] [number flocks] [num examples per flock] [classifier type] [0+, !0-] [percentage]") 
       System.exit(1) 
     } 
-    val sc = new SparkContext(new SparkConf().setAppName("AFAlertResample"))
+    val conf = new SparkConf().setAppName("AFAlertResample").setMaster("spark://Master:7077")
+    val sc = new SparkContext(conf)
     val trainingData = sc.textFile("hdfs://172.17.0.2:9000" + args(0))
     val training = trainingData.map{ x => ClassedPoint.parse(x, true)}
     val validataionData = sc.textFile("hdfs://172.17.0.2:9000" + args(1))

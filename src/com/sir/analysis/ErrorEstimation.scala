@@ -13,13 +13,17 @@ object ErrorEstimation {
   }
   
   def estimateError(labelAndPreds: RDD[(Double, Double)]): Unit = {
-//    val total = labelAndPreds.count()
-//    val fail = labelAndPreds.filter( x => x._1.toInt != x._2.label.toInt)
-//    val good = labelAndPreds.filter(r => r._1.toInt == r._2.label.toInt)
-    val accRate = labelAndPreds.filter(r => r._1 == r._2).count.toDouble / labelAndPreds.count()
+    val total = labelAndPreds.count()
+    val positive = labelAndPreds.filter(r => 0.0 == r._2 ).count.toDouble
+    val negitive = labelAndPreds.filter(r => 1.0 == r._2 ).count.toDouble
+    val good = labelAndPreds.filter(r => r._1 == r._2).count.toDouble
+    val posgood = labelAndPreds.filter(r => 1.0 == r._2 & 0.0 == r._2).count.toDouble
+    val neggood = labelAndPreds.filter(r => 1.0 == r._2 & 1.0 == r._2).count.toDouble
+    val accRate = good / (total + 0.01)
+    val sensitivity = posgood / (positive + 0.01)
+    val specificity = neggood / (negitive + 0.01)
     println("Accuracy rate : " + accRate)
-//    println("Total Count = " + total + " Good: " + good)
-//    println("Fail to predict = " + fail)
-//    println("Error rate = " + (1.0 - (good.toDouble / total)))
+    println("Sensitivity: " + sensitivity)
+    println("Specificity: " + specificity)
   }
 }
