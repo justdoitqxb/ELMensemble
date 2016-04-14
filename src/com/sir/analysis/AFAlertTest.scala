@@ -43,11 +43,10 @@ object AFAlertTest {
       val predict = model.predict(x.features)
       (predict, x.label)
     }
-    ErrorEstimation.estimateError(labelAndPreds)
-
+    
     //与随机森林，结果对比
     val categoricalFeaturesInfo = Map[Int, Int]()
-    val numTrees = 100
+    val numTrees = 10
     val featureSubsetStrategy = "auto" 
     val impurity = "gini"
     val maxDepth = 10
@@ -61,6 +60,7 @@ object AFAlertTest {
        (point.label, prediction)
     }
     ErrorEstimation.estimateError(lp)
+    ErrorEstimation.estimateError(labelAndPreds)
     sc.stop() 
   }
 }

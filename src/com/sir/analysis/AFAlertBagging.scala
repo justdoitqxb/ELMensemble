@@ -47,7 +47,6 @@ object AFAlertBagging {
       val predict = model.predict(x.features)
       (predict, x.label)
     }
-    ErrorEstimation.estimateError(labelAndPreds)
 
     //与随机森林，结果对比
     val categoricalFeaturesInfo = Map[Int, Int]()
@@ -65,6 +64,7 @@ object AFAlertBagging {
        (point.label, prediction)
     }
     ErrorEstimation.estimateError(lp)
+    ErrorEstimation.estimateError(labelAndPreds)
     sc.stop() 
   }
 }
