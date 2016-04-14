@@ -61,7 +61,7 @@ class ELMStacking (
   
   private def calTier2Weight(flocks: Array[Predictor], input2: RDD[ClassedPoint]): ELMMatrix = {
     println("Calculate the weight of tier 2...")
-    val numSamples = java.lang.Math.min(input2.count().toInt, 100000)
+    val numSamples = java.lang.Math.min(input2.count().toInt, 30000)
     val trainSet = if(numSamples == 100000) Splitter.bootstrapSampling(input2, numSamples) else input2
     val tier2TrainSet = trainSet.map { sample => 
       val newFeatures = ArrayBuffer[Double]()

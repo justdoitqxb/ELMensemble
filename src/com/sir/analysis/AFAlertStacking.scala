@@ -7,7 +7,7 @@ import com.sir.config.StrategyType
 import com.sir.config.StrategyType._
 import com.sir.config.ELMType
 import com.sir.config.ELMType._
-import com.sir.elmensemble.ELMBagging
+import com.sir.elmensemble.ELMStacking
 import com.sir.config.ClassifierType
 import com.sir.config.ClassifierType._
 import com.sir.config.CombinationType
@@ -33,16 +33,16 @@ object AFAlertStacking {
     val validataionData = sc.textFile("hdfs://172.17.0.2:9000" + args(1))
     val validation = validataionData.map { ClassedPoint.parse }
          
-    val splits = validation.randomSplit(Array(0.8, 0.2))
-    val (trainDataPart, testData) = (splits(0), splits(1))
+    val splits = validation.randomSplit(Array(0.6, 0.2, 0.2))
+    val (trainDataPart, stackingTraindata, testData) = (splits(0), splits(1), splits(2))
     val trainData = training ++ trainDataPart
     val numClasses = 2
     val numFlocks: Int = args(2).toInt
     val numSamplesPerNode: Int = args(3).toInt
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
-    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.formString(args(4)))
-    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.6, CombinationType.WeightVote, strategy, sc)
+    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.Mix)
+    val model = ELMStacking.trainClassifier(trainData, stackingTraindata, numFlocks, numSamplesPerNode, 0.8, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)
@@ -65,6 +65,9 @@ object AFAlertStacking {
 //    }
 //    ErrorEstimation.estimateError(lp)
     ErrorEstimation.estimateError(labelAndPreds)
+    println(validation.count)
+    println(validation.filter { _.label == 0.0 }.count())
+    println(validation.filter { _.label == 1.0 }.count())
     sc.stop() 
   }
 }

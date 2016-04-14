@@ -57,7 +57,7 @@ object AFAlertResample {
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.formString(args(4)))
-    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.6, CombinationType.WeightVote, strategy, sc)
+    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.6, CombinationType.Vote, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)

@@ -30,15 +30,15 @@ object AFAlertTest {
     val validation = validataionData.map { ClassedPoint.parse }
          
     val splits = validation.randomSplit(Array(0.8, 0.2))
-    val (trainDataPart, testData) = (splits(0), splits(1))
-    val trainData = training ++ trainDataPart
+    val (trainData, testData) = (splits(0), splits(1))
+    //val trainData = training ++ trainDataPart
     val numClasses = 2
     val numFlocks: Int = 10
     val numSamplesPerNode: Int = 1000
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.Mix)
-    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.8, CombinationType.WeightVote, strategy, sc)
+    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.8, CombinationType.Vote, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)
@@ -61,6 +61,9 @@ object AFAlertTest {
 //    }
 //    ErrorEstimation.estimateError(lp)
     ErrorEstimation.estimateError(labelAndPreds)
+    println(validation.count)
+    println(validation.filter { _.label == 0.0 }.count())
+    println(validation.filter { _.label == 1.0 }.count())
     sc.stop() 
   }
 }
