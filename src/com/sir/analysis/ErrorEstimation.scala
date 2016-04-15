@@ -14,11 +14,16 @@ object ErrorEstimation {
   
   def estimateError(labelAndPreds: RDD[(Double, Double)]): Unit = {
     val total = labelAndPreds.count()
-    val positive = labelAndPreds.filter(r => 0.0 == r._2 ).count.toDouble
-    val negitive = labelAndPreds.filter(r => 1.0 == r._2 ).count.toDouble
-    val good = labelAndPreds.filter(r => r._1 == r._2).count.toDouble
-    val posgood = labelAndPreds.filter(r => 0.0 == r._1 & 0.0 == r._2).count.toDouble
-    val neggood = labelAndPreds.filter(r => 1.0 == r._1 & 1.0 == r._2).count.toDouble
+    val pos = labelAndPreds.filter(r => 0.0 == r._2 )
+    val positive = pos.count.toDouble
+    val neg = labelAndPreds.filter(r => 1.0 == r._2 )
+    val negitive = neg.count.toDouble
+    val goodPred = labelAndPreds.filter(r => r._1 == r._2)
+    val good = goodPred.count.toDouble
+    val posgoodPred = labelAndPreds.filter(r => 0.0 == r._1 && 0.0 == r._2)
+    val posgood = posgoodPred.count.toDouble
+    val neggoodPred = labelAndPreds.filter(r => 1.0 == r._1 && 1.0 == r._2)
+    val neggood = neggoodPred.count.toDouble
     val accRate = good / (total + 0.01)
     val sensitivity = posgood / (positive + 0.01)
     val specificity = neggood / (negitive + 0.01)

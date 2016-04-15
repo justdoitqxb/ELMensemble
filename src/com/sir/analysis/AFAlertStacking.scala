@@ -13,6 +13,7 @@ import com.sir.config.ClassifierType._
 import com.sir.config.CombinationType
 import com.sir.config.CombinationType._
 import com.sir.util.ClassedPoint
+import com.sir.util.Splitter
 //import org.apache.spark.mllib.tree.RandomForest
 //import org.apache.spark.mllib.tree.model.RandomForestModel
 //import org.apache.spark.mllib.util.MLUtils
@@ -34,10 +35,11 @@ object AFAlertStacking {
     val validation = validataionData.map { ClassedPoint.parse }
          
     val splits = validation.randomSplit(Array(0.6, 0.2, 0.2))
-    val (trainDataPart, stackingTraindata, testData) = (splits(0), splits(1), splits(2))
+    val (trainDataPart, stackingTraindataPart, testData) = (splits(0), splits(1), splits(2))
     val trainingPos = training.filter { _.label == 0.0 }.sample(false, 0.2)
     val trainingNeg = training.filter { _.label == 1.0 }
     val trainData = trainingPos ++ trainingNeg ++ trainDataPart
+    val stackingTraindata = Splitter.bootstrapSampling(stackingTraindataPart, 2000)
     val numClasses = 2
     val numFlocks: Int = args(2).toInt
     val numSamplesPerNode: Int = args(3).toInt

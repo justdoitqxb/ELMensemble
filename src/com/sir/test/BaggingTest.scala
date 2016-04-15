@@ -29,11 +29,11 @@ object BaggingTest {
     val (trainData, testData) = (splits(0), splits(1))
     println(trainData.count())
     println(testData.count())
-    val numFlocks: Int  = 10
+    val numFlocks: Int  = 3
     val numSamplesPerNode: Int = 400
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
-    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.Mix)
+    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.KernelELM)
     val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.6, CombinationType.WeightVote, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)

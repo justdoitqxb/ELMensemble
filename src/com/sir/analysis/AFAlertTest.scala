@@ -24,8 +24,7 @@ object AFAlertTest {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("AFAlert").setMaster("spark://Master:7077")
     val sc = new SparkContext(conf)
-    val trainingData = sc.textFile("hdfs://172.17.0.2:9000/af/training70/")
-    val training = trainingData.map{ x => ClassedPoint.parse(x, true)}
+
     val validataionData = sc.textFile("hdfs://172.17.0.2:9000/af/validation70/")
     val validation = validataionData.map { ClassedPoint.parse }
          
@@ -38,7 +37,7 @@ object AFAlertTest {
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.Mix)
-    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.8, CombinationType.Vote, strategy, sc)
+    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.8, CombinationType.WeightVote, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)

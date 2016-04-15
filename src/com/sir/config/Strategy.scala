@@ -135,10 +135,10 @@ object Strategy {
       elmType: ELMType,
       numClasses: Int,
       classifierType: ClassifierType = ClassifierType.KernelELM,
-      numberofHiddenNode: Int = 100,
+      numberofHiddenNode: Int = 200,
       activationFunc: ActivationFuncType = ActivationFuncType.Sigmoid,
       regularizationCoefficient: Double = (2^5).toDouble,
-      kernelType: KernelType = KernelType.Linear): Strategy = flag match{
+      kernelType: KernelType = KernelType.RBF): Strategy = flag match{
     case StrategyType.ELM => 
       ELMStrategy(elmType, numberofHiddenNode, numClasses, activationFunc) 
     case StrategyType.KernelELM => 
