@@ -30,8 +30,8 @@ object Stastics {
     println("Validation pos: " + pos)
     println("Validation neg: " + neg)
     println("Training total: " + ttotal)
-    println("Training pos: " + pos)
-    println("Training neg: " + neg)
+    println("Training pos: " + tpos)
+    println("Training neg: " + tneg)
     sc.stop()
   }
 }
