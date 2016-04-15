@@ -36,10 +36,10 @@ object AFAlertResample {
          
     val splits = validation.randomSplit(Array(0.8, 0.2))
     val (trainDataPart, testData) = (splits(0), splits(1))
-    val trainingPos = training.filter { _.label == 0.0 }.sample(true, 0.2)
+    val trainingPos = training.filter { _.label == 0.0 }.sample(false, 0.2)
     val trainingNeg = training.filter { _.label == 1.0 }
     val combineData = trainingPos ++ trainingNeg ++ trainDataPart
-    var fraction = 0.01
+    var fraction = 0.1
     if (args.length == 7){
       fraction = args(6).toDouble
     }

@@ -34,7 +34,7 @@ object ValidationTest {
     //val trainData = training ++ trainDataPart
     val numClasses = 5
     val numFlocks: Int = 2
-    val numSamplesPerNode: Int = 2000
+    val numSamplesPerNode: Int = 1000
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.Mix)

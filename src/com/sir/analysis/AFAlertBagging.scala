@@ -35,7 +35,7 @@ object AFAlertBagging {
          
     val splits = validation.randomSplit(Array(0.8, 0.2))
     val (trainDataPart, testData) = (splits(0), splits(1))
-    val trainingPos = training.filter { _.label == 0.0 }.sample(true, 0.2)
+    val trainingPos = training.filter { _.label == 0.0 }.sample(false, 0.2)
     val trainingNeg = training.filter { _.label == 1.0 }
     val trainData = trainingPos ++ trainingNeg ++ trainDataPart
     val numClasses = 2
@@ -44,7 +44,7 @@ object AFAlertBagging {
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.formString(args(4)))
-    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.6, CombinationType.Vote, strategy, sc)
+    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.8, CombinationType.Vote, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)

@@ -19,7 +19,9 @@ object Stastics {
          
     val splits = validation.randomSplit(Array(0.8, 0.2))
     val (trainDataPart, testData) = (splits(0), splits(1))
-    val trainData = training ++ trainDataPart
+    val trainingPos = training.filter { _.label == 0.0 }.sample(true, 0.2)
+    val trainingNeg = training.filter { _.label == 1.0 }
+    val trainData = trainingPos ++ trainingNeg ++ trainDataPart
     val pos = validation.filter { _.label == 0.0 }.count()
     val neg = validation.filter { _.label == 1.0 }.count()
     val total = validation.count

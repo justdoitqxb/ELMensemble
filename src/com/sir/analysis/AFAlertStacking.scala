@@ -35,7 +35,7 @@ object AFAlertStacking {
          
     val splits = validation.randomSplit(Array(0.6, 0.2, 0.2))
     val (trainDataPart, stackingTraindata, testData) = (splits(0), splits(1), splits(2))
-    val trainingPos = training.filter { _.label == 0.0 }.sample(true, 0.2)
+    val trainingPos = training.filter { _.label == 0.0 }.sample(false, 0.2)
     val trainingNeg = training.filter { _.label == 1.0 }
     val trainData = trainingPos ++ trainingNeg ++ trainDataPart
     val numClasses = 2
@@ -43,7 +43,7 @@ object AFAlertStacking {
     val numSamplesPerNode: Int = args(3).toInt
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
-    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.Mix)
+    val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.formString(args(4)))
     val model = ELMStacking.trainClassifier(trainData, stackingTraindata, numFlocks, numSamplesPerNode, 0.8, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
