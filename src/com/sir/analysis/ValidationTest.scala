@@ -38,7 +38,7 @@ object ValidationTest {
     val flag  = StrategyType.ELMEnsemble
     val elmType = ELMType.Classification
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, classifierType = ClassifierType.KernelELM)
-    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.8, CombinationType.Vote, strategy, sc)
+    val model = ELMBagging.trainClassifier(trainData, numFlocks, numSamplesPerNode, 0.6, CombinationType.Vote, strategy, sc)
     val labelAndPreds = testData.map{x =>
       val predict = model.predict(x.features)
       (predict, x.label)
@@ -60,10 +60,12 @@ object ValidationTest {
 //       (point.label, prediction)
 //    }
 //    ErrorEstimation.estimateError(lp)
+    val pos = validation.filter { _.label == 0.0 }.count()
+    val neg = validation.filter { _.label == 1.0 }.count()
     ErrorEstimation.estimateError(labelAndPreds)
     println(validation.count)
-    println(validation.filter { _.label == 0.0 }.count())
-    println(validation.filter { _.label == 1.0 }.count())
+    println(pos)
+    println(neg)
     sc.stop() 
   }
 }
