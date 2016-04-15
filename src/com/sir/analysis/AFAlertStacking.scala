@@ -66,6 +66,5 @@ object AFAlertStacking {
 //    ErrorEstimation.estimateError(lp)
     ErrorEstimation.estimateError(labelAndPreds)
     sc.stop() 
-    sc.stop() 
   }
 }
