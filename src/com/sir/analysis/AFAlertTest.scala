@@ -60,13 +60,7 @@ object AFAlertTest {
 //       (point.label, prediction)
 //    }
 //    ErrorEstimation.estimateError(lp)
-    val pos = validation.filter { _.label == 0.0 }.count()
-    val neg = validation.filter { _.label == 1.0 }.count()
     ErrorEstimation.estimateError(labelAndPreds)
-    println(validation.count)
-    println(pos)
-    println(neg)
-    sc.stop() 
     sc.stop() 
   }
 }
