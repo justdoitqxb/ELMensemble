@@ -35,7 +35,9 @@ object AFAlertStacking {
          
     val splits = validation.randomSplit(Array(0.6, 0.2, 0.2))
     val (trainDataPart, stackingTraindata, testData) = (splits(0), splits(1), splits(2))
-    val trainData = training ++ trainDataPart
+    val trainingPos = training.filter { _.label == 0.0 }.sample(true, 0.2)
+    val trainingNeg = training.filter { _.label == 1.0 }
+    val trainData = trainingPos ++ trainingNeg ++ trainDataPart
     val numClasses = 2
     val numFlocks: Int = args(2).toInt
     val numSamplesPerNode: Int = args(3).toInt
