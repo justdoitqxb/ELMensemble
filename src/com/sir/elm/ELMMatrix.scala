@@ -372,7 +372,7 @@ object ELMMatrix {
     }
     val ELMMatrixtoRDD = sc.parallelize(mat.matrix, 1)
     val rowMatrix = new RowMatrix(ELMMatrixtoRDD.map(line => Vectors.dense(line)))
-    val svd: SingularValueDecomposition[RowMatrix, Matrix] = rowMatrix.computeSVD(mat.columns, true)
+    val svd: SingularValueDecomposition[RowMatrix, Matrix] = rowMatrix.computeSVD(java.lang.Math.min(250,mat.columns()), true)
 //      svd.s.toArray.foreach(println)
 //      svd.U.rows.foreach(println)
 //      svd.V.toArray.foreach(println)

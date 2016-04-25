@@ -39,7 +39,7 @@ object AFAlertStacking {
     val trainingPos = training.filter { _.label == 0.0 }.sample(false, 0.2)
     val trainingNeg = training.filter { _.label == 1.0 }
     val trainData = trainingPos ++ trainingNeg ++ trainDataPart
-    val stackingTraindata = Splitter.bootstrapSampling(stackingTraindataPart, 2000)
+    val stackingTraindata = Splitter.bootstrapSampling(stackingTraindataPart, 5000)
     val numClasses = 2
     val numFlocks: Int = args(2).toInt
     val numSamplesPerNode: Int = args(3).toInt

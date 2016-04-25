@@ -49,7 +49,11 @@ class ELMStacking (
   
   private def buildBaseClassifier(input: RDD[ClassedPoint]): Predictor = {
     val (classifierType, childStrategy) = Strategy.generateChildStrategy(strategy, elmPerKelm)
-    val numSamples = java.lang.Math.min(numSamplesPerNode, 20000)
+    //val numSamples = java.lang.Math.min(numSamplesPerNode, 20000)
+    val numSamples = classifierType match {
+      case ClassifierType.ELM => java.lang.Math.min(numSamplesPerNode, 5000)
+      case ClassifierType.KernelELM => java.lang.Math.min(numSamplesPerNode, 2000)
+    }
     val trainSet = Splitter.bootstrapSampling(input, numSamples)
     println("Number Examples: " + trainSet.count())
     classifierType match {

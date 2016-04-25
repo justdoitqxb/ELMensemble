@@ -19,12 +19,15 @@ object SVDTest {
     }
 
     val sc = new SparkContext("local","svdtest")
-    val svdMatrix = sc.textFile(dataFile).map(_.split(" "))
-    val rowMatrix = new RowMatrix(svdMatrix.map(_.map(_.toDouble)).map(_.toArray).map(line => Vectors.dense(line)))
-    val svd = rowMatrix.computeSVD(3, true, 0)
-    svd.s.toArray.foreach(println)
-    svd.U.rows.foreach(println)
-    svd.V.toArray.foreach(println)
+    val svdMatrix = sc.textFile(dataFile).map(_.split(","))
+    val tmp1 = svdMatrix.map(_.map(_.toDouble))
+    val tmp2 = tmp1.map{ Vectors.dense }
+    val rowMatrix = new RowMatrix(tmp2)
+    val svd = rowMatrix.computeSVD(100, true, 0)
+    println(tmp2.count)
+    //svd.s.toArray.foreach(println)
+//    svd.U.rows.foreach(println)
+//    svd.V.toArray.foreach(println)
     sc.stop()
   }
 
@@ -32,7 +35,7 @@ object SVDTest {
     //System.setProperty("spark.executor.memory", "1g")
     //println("Usage: [file_path]" + args(0))
     val PREFIX: String = "C://Users//bsn//Scala//ELM_ensemble//data//"
-    val fileName = "svd.txt"
+    val fileName = "tt.txt"
     process(PREFIX + fileName)
   }
 }

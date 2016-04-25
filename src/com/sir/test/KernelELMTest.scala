@@ -21,14 +21,14 @@ object KernelELMTest {
   def main(args: Array[String]): Unit = {
     val sc = new SparkContext("local","ELMTest")
     val numClasses = 2
-    val data = DataGenerator.generate(500, 100, numClasses, sc)
+    val data = DataGenerator.generate(3000, 100, numClasses, sc)
     val splits = data.randomSplit(Array(0.8, 0.2))
     val (trainData, testData) = (splits(0), splits(1))
     println(trainData.count())
     println(testData.count())
     val flag  = StrategyType.KernelELM
     val elmType = ELMType.Classification
-    val kt = KernelType.fromString("wavelet")
+    val kt = KernelType.fromString("rbf")
     val strategy = Strategy.generateStrategy(flag, elmType, numClasses, kernelType = kt)
     val model = KernelELM.trainClassifier(trainData, strategy, sc)
     val labelAndPreds = testData.map{x =>
